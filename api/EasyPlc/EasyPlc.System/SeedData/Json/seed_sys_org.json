@@ -1,0 +1,40 @@
+{
+  "RECORDS": [
+    {
+      "Id": "428901086240837",
+      "ParentId": "0",
+      "DirectorId": "",
+      "Name": "昆山佰奥软件有限公司",
+      "Names": "昆山佰奥软件有限公司",
+      "Code": "rJ5Tp69d1c",
+      "Category": "COMPANY",
+      "SortCode": "1",
+      "CreateTime": "2023-06-16 09:03:01",
+      "UpdateTime": "",
+      "CreateUserId": "212725263002001",
+      "UpdateUserId": "",
+      "CreateUser": "superAdmin",
+      "UpdateUser": "",
+      "IsDelete": "0",
+      "ExtJson": ""
+    },
+    {
+      "Id": "428901176873029",
+      "ParentId": "428901086240837",
+      "DirectorId": "",
+      "Name": "信息化部",
+      "Names": "昆山佰奥软件有限公司/信息化部",
+      "Code": "n3DAtwvHxt",
+      "Category": "DEPT",
+      "SortCode": "1",
+      "CreateTime": "2023-06-16 09:03:23",
+      "UpdateTime": "2023-06-27 08:32:19",
+      "CreateUserId": "212725263002001",
+      "UpdateUserId": "212725263002001",
+      "CreateUser": "superAdmin",
+      "UpdateUser": "superAdmin",
+      "IsDelete": "0",
+      "ExtJson": ""
+    }
+  ]
+}

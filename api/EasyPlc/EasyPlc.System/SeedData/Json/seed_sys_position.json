@@ -1,0 +1,21 @@
+{
+  "RECORDS": [
+    {
+      "Id": "212725263003001",
+      "OrgId": "428901176873029",
+      "Name": "开发工程师",
+      "Code": "rsz5dmh762",
+      "Category": "MIDDLE",
+      "SortCode": "1",
+      "CreateOrgId": "252885263003720",
+      "CreateTime": "",
+      "UpdateTime": "2023-06-24 10:42:23",
+      "CreateUserId": "",
+      "UpdateUserId": "212725263002001",
+      "CreateUser": "",
+      "UpdateUser": "superAdmin",
+      "IsDelete": "0",
+      "ExtJson": ""
+    }
+  ]
+}

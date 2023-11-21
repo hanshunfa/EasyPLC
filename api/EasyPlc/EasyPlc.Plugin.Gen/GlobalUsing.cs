@@ -1,0 +1,22 @@
+﻿global using Furion;
+global using Furion.DependencyInjection;
+global using Furion.FriendlyException;
+global using Furion.ViewEngine;
+global using Mapster;
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+global using EasyPlc.Core;
+global using EasyPlc.Core.Utils;
+global using EasyPlc.System;
+global using SimpleTool;
+global using System.ComponentModel.DataAnnotations;
+global using System.Text;
+global using Furion.DynamicApiController;
+global using System.ComponentModel;
+global using EasyPlc.SqlSugar;
+global using SqlSugar;
+
+global using EasyPlc.Application;

@@ -1,0 +1,14 @@
+﻿global using Furion;
+global using Furion.DependencyInjection;
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.Extensions.DependencyInjection;
+global using EasyPlc.Core;
+global using EasyPlc.Cache;
+global using EasyPlc.Plugin.Core;
+global using EasyPlc.SqlSugar;
+global using SimpleMQTT;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Mvc;
+global using EasyPlc.System;
+global using EasyPlc.Application;

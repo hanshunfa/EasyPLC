@@ -1,0 +1,25 @@
+{
+  //秘钥配置
+  "Cryptogram": {
+    //SM2国密配置
+    "SM2": {
+      "PublicKey": "04BD62406DF6789B1FBE8C457AECAE6D7C806CDB39316F190519905C24DF395E8952C47798D76ADECF8CA28C935702AFCDD9B17DE77121FA6448F0EDEFBD8365D6", //公钥
+      "PrivateKey": "00F908E5ED9C2059A960E3A58056F69E0CF75299182CEB93B74CD1FDC633FCA0E5" //私钥
+    }
+  },
+  //日志配置
+  "Logging": {
+    "Monitor": {
+      "Write": false, //是否文件写入LoggingMonitor日志
+      "Console": false, //是否控制台输出LoggingMonitor日志
+    },
+    "MessageFormat": true, //是否格式化日志
+    "LogLevel": {
+      "Default": "Information", //默认日志级别
+      "Max": "Error", //最大日志级别
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information",
+      "Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware": "Information"
+    }
+  }
+}

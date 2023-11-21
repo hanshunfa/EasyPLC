@@ -1,0 +1,40 @@
+{
+  "RECORDS": [
+    {
+      "Id": "212725263001001",
+      "OrgId": "",
+      "Name": "超级管理员",
+      "Code": "superAdmin",
+      "Category": "GLOBAL",
+      "DefaultDataScope": "{\"Level\":5,\"ScopeCategory\":\"SCOPE_ALL\",\"ScopeDefineOrgIdList\":[]}",
+      "SortCode": "1",
+      "CreateOrgId": "0",
+      "CreateTime": "",
+      "UpdateTime": "",
+      "CreateUserId": "",
+      "UpdateUserId": "",
+      "CreateUser": "",
+      "UpdateUser": "",
+      "IsDelete": "0",
+      "ExtJson": ""
+    },
+    {
+      "Id": "212725263001002",
+      "OrgId": "428901176873029",
+      "Name": "业务管理员",
+      "Code": "bizAdmin",
+      "Category": "ORG",
+      "DefaultDataScope": "{\"Level\":2,\"ScopeCategory\":\"SCOPE_ORG\",\"ScopeDefineOrgIdList\":[]}",
+      "SortCode": "1",
+      "CreateOrgId": "0",
+      "CreateTime": "",
+      "UpdateTime": "2023-06-25 09:52:56",
+      "CreateUserId": "",
+      "UpdateUserId": "212725263002001",
+      "CreateUser": "",
+      "UpdateUser": "superAdmin",
+      "IsDelete": "0",
+      "ExtJson": ""
+    }
+  ]
+}

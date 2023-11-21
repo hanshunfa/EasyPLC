@@ -1,0 +1,29 @@
+{
+  //sqlsugar设置
+  "SqlSugarSettings": {
+    //Sqlsugar连接字符串配置
+    "ConnectionStrings": [
+      //{
+      //  "ConfigId": "TopaLineAdmin", //租户ID
+      //  "ConnectionString": "Data Source=./TopaLineAdmin.db", //连接字符串
+      //  "DbType": "Sqlite", //数据库类型
+      //  "IsAutoCloseConnection": true, //是否自动释放
+      //  "IsUnderLine": false //是否驼峰转下划线
+      //},
+      {
+        "ConfigId": "EasyPlc", //租户ID
+        "ConnectionString": "server=localhost;Database=EasyPlc;Uid=root;Pwd=Kstopa123?;CharSet=utf8mb4;", //连接字符串
+        "DbType": "MySql", //数据库类型
+        "IsAutoCloseConnection": true, //是否自动释放
+        "IsUnderLine": false //是否驼峰转下划线
+      },
+      //      {
+      //        "ConfigId": "TopaLineAdmin", //租户ID
+      //        "ConnectionString": "Server=192.168.1.16;Database=TopaLineAdmin;User=sa;Password=123456;MultipleActiveResultSets=True;", //连接字符串
+      //        "DbType": "SqlServer", //数据库类型
+      //        "IsAutoCloseConnection": true, //是否自动释放
+      //        "IsUnderLine": false //是否驼峰转下划线
+      //      }
+    ]
+  }
+}

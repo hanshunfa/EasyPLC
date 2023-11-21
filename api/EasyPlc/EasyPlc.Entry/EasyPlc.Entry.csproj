@@ -1,0 +1,83 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <PackageIcon></PackageIcon>
+    <ApplicationIcon>topa.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Images\kstopa.jpg" />
+    <None Remove="Images\kstopaBack.jpg" />
+    <None Remove="Images\login_background.png" />
+    <None Remove="Images\login_background_front.png" />
+    <None Remove="Images\logo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="topa.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\kstopa.jpg" />
+    <Resource Include="Images\kstopaBack.jpg" />
+    <Resource Include="Images\login_background_front.png" />
+    <Resource Include="Images\logo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\login_background.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DevExpress.Win.Design" Version="21.2.*-*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EasyPlc.Web.Core\EasyPlc.Web.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="ChrildrenForms\Adapter\Resource\CustomData\CustomDataEditForm.cs" />
+    <Compile Update="ChrildrenForms\Adapter\Resource\CustomData\CopyForm.cs" />
+    <Compile Update="ChrildrenForms\Adapter\ScrewGun\ScrewGunEditForm.cs" />
+    <Compile Update="ChrildrenForms\Adapter\FixedScan\FixedScanEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ChrildrenForms\Adapter\FixedScan\FixedScanForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ChrildrenForms\Mac\Carrier\CarrierEditForm.cs" />
+    <Compile Update="ChrildrenForms\Mac\Flow\FlowForm.cs" />
+    <Compile Update="ChrildrenForms\Product\Label\PreviewLabelForm.cs" />
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\repair.prn">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\scrap.prn">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

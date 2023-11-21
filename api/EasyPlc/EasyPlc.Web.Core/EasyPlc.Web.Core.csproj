@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!--<Nullable>enable</Nullable>-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EasyPlc.Application\EasyPlc.Application.csproj" />
+    <ProjectReference Include="..\EasyPlc.Plugin.Gen\EasyPlc.Plugin.Gen.csproj" />
+    <ProjectReference Include="..\EasyPlc.Plugin.Mqtt\EasyPlc.Plugin.Mqtt.csproj" />
+    <ProjectReference Include="..\EasyPlc.Plugin.NewlandScan\EasyPlc.Plugin.Scan.csproj" />
+    <ProjectReference Include="..\EasyPlc.Plugin.Plc\EasyPlc.Plugin.Plc.csproj" />
+    <ProjectReference Include="..\EasyPlc.Plugin.ScrewGun\EasyPlc.Plugin.ScrewGun.csproj" />
+    <ProjectReference Include="..\EasyPlc.Plugin.SygoleRFID\EasyPlc.Plugin.SygoleRFID.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Web.Development.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Web.Production.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
