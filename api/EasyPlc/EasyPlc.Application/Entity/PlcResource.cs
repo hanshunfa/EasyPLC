@@ -63,6 +63,11 @@ public class PlcResource : BaseEntity
     /// 字节点
     /// </summary>
     [SugarColumn(IsIgnore = true)]
-    public List<SysResource> Children { get; set; }
+    public List<PlcResource> Children { get; set; }
+    /// <summary>
+    /// 设置为叶子节点(设置了loadData时有效)
+    /// </summary>
+    [SugarColumn(IsIgnore = true)]
+    public bool? IsLeaf { get; set; }
 }
 

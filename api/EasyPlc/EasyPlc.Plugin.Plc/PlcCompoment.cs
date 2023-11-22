@@ -55,7 +55,7 @@ public sealed class PlcCompoment : IServiceComponent
 /// </summary>
 public sealed class PlcApplicationCompoment : IApplicationComponent
 {
-    public void Load(IApplicationBuilder app, IWebHostEnvironment env, ComponentContext componentContext)
+    public async void Load(IApplicationBuilder app, IWebHostEnvironment env, ComponentContext componentContext)
     {
         Console.WriteLine("启用SiemensPLC");
         //初始化工厂
@@ -65,7 +65,7 @@ public sealed class PlcApplicationCompoment : IApplicationComponent
         if (pluginSettings.SiemensPlc.IsInitFactory)
         {
             Console.WriteLine("初始化SiemensPLC工厂");
-            siemensFac.InitFactory();
+            await siemensFac.InitFactory();
             Console.WriteLine("连接所有SiemensPLC");
             siemensFac.StartPLC();
         }

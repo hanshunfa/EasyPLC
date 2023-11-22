@@ -34,3 +34,14 @@ public class PlcResourceCopyInput
     /// </summary>
     public bool ContainsChild { get; set; } = false;
 }
+/// <summary>
+/// 组织树查询参数
+/// 懒加载用
+/// </summary>
+public class PlcResourceTreeInput
+{
+    /// <summary>
+    /// 父Id
+    /// </summary>
+    public long? ParentId { get; set; }
+}

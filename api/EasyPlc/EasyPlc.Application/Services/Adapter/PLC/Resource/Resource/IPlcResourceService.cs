@@ -11,6 +11,13 @@ public interface IPlcResourceService : ITransient
     /// <returns></returns>
     Task<SqlSugarPagedList<PlcResource>> Page(PlcResourcePageInput input);
     /// <summary>
+    /// 获取资源树型结构
+    /// </summary>
+    /// <param name="resourceIds">资源ID列表</param>
+    /// <param name="treeInput">PLC选择器(懒加载用)</param>
+    /// <returns>PLC树列表</returns>
+    Task<List<PlcResource>> Tree(List<long> resourceIds = null, PlcResourceTreeInput treeInput = null);
+    /// <summary>
     /// 根据资源ID获取所有下级资源
     /// </summary>
     /// <param name="resId">资源ID</param>

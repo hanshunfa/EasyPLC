@@ -22,12 +22,16 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
     /// <summary>
     /// 初始化工厂，创建PLC通讯实列
     /// </summary>
-    public string InitFactory()
+    public async Task<string> InitFactory()
     {
+        await _genSiemensPlcInfoUtil.GenSiemensPLCInfoList();
+
+
+
         if (!IsUse) return "工厂不能使用，请联系管理员";
         if (ListConnectionSiemensPLC.Count > 0) return "工厂已存在";
         //根据动态生成的PLC信息，若返回NULL，表示PLC还没有动态生成
-        var plcInfos =_genSiemensPlcInfoUtil.GetSiemensPLCInfo();
+        var plcInfos =await _genSiemensPlcInfoUtil.GenSiemensPLCInfoList();
         if (plcInfos == null) return "请通过代码生成器生成代码，重新编译测试";
         //创建实例
         foreach ( var plcInfo in plcInfos )

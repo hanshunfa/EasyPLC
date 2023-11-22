@@ -44,7 +44,7 @@ public class SiemensPlcFactoryController : AllowAnonymousController
     [HttpPost("init")]
     public async Task<string> InitFactory()
     {
-        return await Task.FromResult(_siemensPlcFactoryService.InitFactory());
+        return await _siemensPlcFactoryService.InitFactory();
     }
     /// <summary>
     /// 全部开始

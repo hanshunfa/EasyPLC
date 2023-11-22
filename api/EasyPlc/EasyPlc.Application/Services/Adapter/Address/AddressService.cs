@@ -56,24 +56,26 @@ public class AddressService : DbRepository<PlcAddress>, IAddressService
     {
         var plcResourceList = new List<PlcResource>();
         var addrList = await GetListByPlcId(plcId);
-
-        //获取PLC对于开始地址
-        var plc = await _plcConfigService.GetPlcConfigById(plcId);
-        var aej = plc.ExtJson.ToObject<AddrExtJson>();
-        string startAddr = aej.StartAddr;
-        var pci = new PlcResourceCopyInput
+        if (addrList.Count > 0)
         {
-            StartAddr = startAddr,
-            ContainsChild = true,
-        };
-        foreach ( var addr in addrList)
-        {
-            //拷贝
-            pci.TargetId = addr.Id;
-            pci.Ids = new List<long> { addr.ResourceId };
+            //获取PLC对于开始地址
+            var plc = await _plcConfigService.GetPlcConfigById(plcId);
+            var aej = plc.ExtJson.ToObject<AddrExtJson>();
+            string startAddr = aej.StartAddr;
+            var pci = new PlcResourceCopyInput
+            {
+                StartAddr = startAddr,
+                ContainsChild = true,
+            };
+            foreach (var addr in addrList)
+            {
+                //拷贝
+                pci.TargetId = addr.Id;
+                pci.Ids = new List<long> { addr.ResourceId };
 
-            var getCopyResult = await _plcResourceService.GetCopy(pci);
-            plcResourceList.AddRange(getCopyResult);
+                var getCopyResult = await _plcResourceService.GetCopy(pci);
+                plcResourceList.AddRange(getCopyResult);
+            }
         }
       
         return plcResourceList;

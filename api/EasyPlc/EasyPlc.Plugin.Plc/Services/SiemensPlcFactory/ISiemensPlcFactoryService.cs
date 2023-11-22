@@ -11,7 +11,7 @@ public interface ISiemensPlcFactoryService : ISingleton
     /// <summary>
     /// 初始化工厂，创建PLC通讯实列
     /// </summary>
-    string InitFactory();
+    Task<string> InitFactory();
     /// <summary>
     /// 全部开始
     /// </summary>

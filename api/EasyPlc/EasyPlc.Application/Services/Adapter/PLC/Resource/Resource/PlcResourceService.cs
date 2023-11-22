@@ -24,6 +24,24 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
         var pageInfo = await query.ToPagedListAsync(input.Current, input.Size);//分页
         return pageInfo;
     }
+    public async Task<List<PlcResource>> Tree(List<long> resourceIds = null, PlcResourceTreeInput treeInput = null)
+    {
+        long parentId = EasyPlcConst.Zero;//父级ID
+        //获取所有PLC
+        var list = await GetListAsync();
+        if (resourceIds != null)
+            list = GetParentListByIds(list, resourceIds);//如果PLCID不为空则获取PLCID列表的所有父节点
+        //如果选择器ID不为空则表示是懒加载,只加载子节点
+        if (treeInput != null && treeInput.ParentId != null)
+        {
+            parentId = treeInput.ParentId.Value;
+            list = GetPlcResourceChilden(list, treeInput.ParentId.Value);//获取下级
+        }
+        list = list.OrderBy(it => it.SortCode).ToList();//排序
+        //构建PLC树
+        var result = ConstrucTrees(list, parentId);
+        return result;
+    }
     /// <inheritdoc />
     public async Task<List<string>> GetCodeByIds(List<long> ids, string category)
     {
@@ -654,6 +672,81 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
             }
             if (resource.Category == CateGoryConst.Resource_BaseData) throw Oops.Bah($"基础类型数据不能添加子集");
         }
+    }
+
+    /// <summary>
+    /// 根据PLCId列表获取所有父级PLC
+    /// </summary>
+    /// <param name="allPlcList"></param>
+    /// <param name="PlcIds"></param>
+    /// <returns></returns>
+    public List<PlcResource> GetParentListByIds(List<PlcResource> allPlcList, List<long> PlcIds)
+    {
+        var resource = new HashSet<PlcResource>();//结果列表
+        //遍历PLCID
+        PlcIds.ForEach(it =>
+        {
+            //获取该PLCID的所有父级
+            var parents = GetPlcParents(allPlcList, it);
+            resource.AddRange(parents);//添加到结果
+        });
+        return resource.ToList();
+    }
+    public List<PlcResource> GetPlcParents(List<PlcResource> allPlcList, long PlcId, bool includeSelf = true)
+    {
+        //找到PLC
+        var resource = allPlcList.Where(it => it.Id == PlcId).FirstOrDefault();
+        if (resource != null)//如果PLC不为空
+        {
+            var data = new List<PlcResource>();
+            var parents = GetPlcParents(allPlcList, resource.ParentId??0, includeSelf);//递归获取父节点
+            data.AddRange(parents);//添加父节点;
+            if (includeSelf)
+                data.Add(resource);//添加到列表
+            return data;//返回结果
+        }
+        return new List<PlcResource>();
+    }
+
+    /// <summary>
+    /// 获取PLC所有下级
+    /// </summary>
+    /// <param name="PlcList"></param>
+    /// <param name="parentId"></param>
+    /// <returns></returns>
+    public List<PlcResource> GetPlcResourceChilden(List<PlcResource> resourceList, long parentId)
+    {
+        //找下级PLCID列表
+        var list = resourceList.Where(it => it.ParentId == parentId).ToList();
+        if (list.Count > 0)//如果数量大于0
+        {
+            var data = new List<PlcResource>();
+            foreach (var item in list)//遍历PLC
+            {
+                var childen = GetPlcResourceChilden(resourceList, item.Id);//获取子节点
+                data.AddRange(childen);//添加子节点);
+                data.Add(item);//添加到列表
+            }
+            return data;//返回结果
+        }
+        return new List<PlcResource>();
+    }
+
+    public List<PlcResource> ConstrucTrees(List<PlcResource> resourceList, long parentId = 0)
+    {
+        //找下级字典ID列表
+        var list = resourceList.Where(it => it.ParentId == parentId).OrderBy(it => it.SortCode).ToList();
+        if (list.Count > 0)//如果数量大于0
+        {
+            var data = new List<PlcResource>();
+            foreach (var item in list)//遍历字典
+            {
+                item.Children = ConstrucTrees(resourceList, item.Id);//添加子节点
+                data.Add(item);//添加到列表
+            }
+            return data;//返回结果
+        }
+        return new List<PlcResource>();
     }
 
     #endregion 方法

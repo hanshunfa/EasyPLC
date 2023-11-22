@@ -82,11 +82,11 @@ public class PlcExtJson
     /// <summary>
     /// 支架号 
     /// </summary>
-    public int Rack { get; set; }
+    public byte Rack { get; set; }
     /// <summary>
     /// 插槽号 
     /// </summary>
-    public int Slot { get; set; }
+    public byte Slot { get; set; }
 }
 public class AddrExtJson
 {

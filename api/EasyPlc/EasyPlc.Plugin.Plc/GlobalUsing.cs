@@ -22,3 +22,5 @@ global using Furion.DependencyInjection;
 
 global using System.ComponentModel;
 global using EasyPlc.Application;
+
+global using Furion.ClayObject;

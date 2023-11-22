@@ -374,6 +374,11 @@ public class PlcConfigService : DbRepository<PlcConfig>, IPlcConfigService
             foreach (var item in Plcs)//遍历PLC
             {
                 var childen = GetPlcConfigChilden(PlcList, item.Id);//获取子节点
+                //遍历子节点
+                childen.ForEach(it =>
+                {
+                    if (!PlcList.Any(x => x.ParentId == it.Id)) it.IsLeaf = true;//如果没有下级,则设置为叶子节点
+                });
                 data.AddRange(childen);//添加子节点);
                 data.Add(item);//添加到列表
             }
