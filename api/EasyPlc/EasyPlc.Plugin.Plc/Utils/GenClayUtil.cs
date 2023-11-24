@@ -23,7 +23,6 @@
 * 
 ===============================================================================================*/
 
-using System.Security.Cryptography;
 
 namespace EasyPlc.Plugin.Plc.Utils;
 

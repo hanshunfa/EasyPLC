@@ -34,6 +34,7 @@ public class EventInfo
     public string ReadAddr { get; set; }
     public ushort ReadLen { get; set; }
     public string ReadClassName { get; set; }
+    public bool IsReset { get; set; } = true;
     public string WriteAddr { get; set; }
     public ushort WriteLen { get; set; }
     public string WriteClassName { get; set; }
@@ -41,6 +42,6 @@ public class EventInfo
     public bool TriggerCompleted { get; set; }
     public int SequenceIDR { get; set; } = -1;
     public int SequenceIDW { get; set; } = -1;
-    public dynamic ObjR { get; set; }
-    public dynamic ObjW { get; set; }
+    public List<PlcResource> ObjR { get; set; }
+    public List<PlcResource> ObjW { get; set; }
 }

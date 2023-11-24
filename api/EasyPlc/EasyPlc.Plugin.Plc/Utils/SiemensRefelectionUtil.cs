@@ -669,16 +669,16 @@ public static class SiemensRefelectionUtil
     }
     public static void UpdateReadContent(this PublicInfo p, byte[] read_buffer)
     {
-        p.ObjR = PraseStructContent(p.GetReadClassType(), read_buffer, new ReverseBytesTransform());
+        //p.ObjR = PraseStructContent(p.GetReadClassType(), read_buffer, new ReverseBytesTransform());
     }
     public static void UpdateReadContent(this EventInfo ei, byte[] read_buffer)
     {
-        ei.ObjR = PraseStructContent(ei.GetReadClassType(), read_buffer, new ReverseBytesTransform());
+        //ei.ObjR = PraseStructContent(ei.GetReadClassType(), read_buffer, new ReverseBytesTransform());
     }
     public static void ResetWriteClassLenth(this PublicInfo p)
     {
         p.WriteLen = GetObjectLenghtWithType(p.GetWriteClassType());
-        p.WriteBuffer = new byte[p.WriteLen];
+        //p.WriteBuffer = new byte[p.WriteLen];
     }
     public static void ResetWriteClassLenth(this EventInfo ei)
     {
@@ -687,11 +687,11 @@ public static class SiemensRefelectionUtil
     }
     public static void UpdateWriteContent(this PublicInfo p, byte[] read_buffer)
     {
-        p.ObjW = PraseStructContent(p.GetWriteClassType(), read_buffer, new ReverseBytesTransform());
+        //p.ObjW = PraseStructContent(p.GetWriteClassType(), read_buffer, new ReverseBytesTransform());
     }
     public static void UpdateWriteContent(this EventInfo ei, byte[] write_buffer)
     {
-        ei.ObjW = PraseStructContent(ei.GetWriteClassType(), write_buffer, new ReverseBytesTransform());
+        //ei.ObjW = PraseStructContent(ei.GetWriteClassType(), write_buffer, new ReverseBytesTransform());
     }
 
 

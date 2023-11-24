@@ -32,15 +32,15 @@ public class WorkingProcess
     /// <param name="publicInfo"></param>
     private void OnPublicCallback(string op, PublicInfo publicInfo)
     {
-        var r = publicInfo.ObjR as General_PI_PlcToEap;
-        var w = publicInfo.ObjW as General_PI_EapToPlc;
+        //var r = publicInfo.ObjR as General_PI_PlcToEap;
+        //var w = publicInfo.ObjW as General_PI_EapToPlc;
 
-        if (r.HeartBeat == 0) w.HearBeat = 1; else w.HearBeat = 0;
+        //if (r.HeartBeat == 0) w.HearBeat = 1; else w.HearBeat = 0;
 
-        //使能
-        w.Command = 1;
-        //型号
-        w.Model1 = OrderInfo.Model;
+        ////使能
+        //w.Command = 1;
+        ////型号
+        //w.Model1 = OrderInfo.Model;
     }
     /// <summary>
     /// 事件区回调

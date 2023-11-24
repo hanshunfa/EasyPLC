@@ -35,10 +35,10 @@ public class PublicInfo
     public string ReadAddr { get; set; }
     public ushort ReadLen { get; set; }
     public string ReadClassName { get; set; }
+    public bool IsReset { get; set; } = true;
     public string WriteAddr { get; set; }
     public ushort WriteLen;
     public string WriteClassName { get; set; }
-    public byte[] WriteBuffer { get; set; }
-    public dynamic ObjR { get; set; }
-    public dynamic ObjW { get; set; }
+    public List<PlcResource> ObjR { get; set; }
+    public List<PlcResource> ObjW { get; set; }
 }

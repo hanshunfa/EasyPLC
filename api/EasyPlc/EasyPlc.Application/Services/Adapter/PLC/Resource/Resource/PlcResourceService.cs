@@ -24,22 +24,32 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
         var pageInfo = await query.ToPagedListAsync(input.Current, input.Size);//分页
         return pageInfo;
     }
-    public async Task<List<PlcResource>> Tree(List<long> resourceIds = null, PlcResourceTreeInput treeInput = null)
+    public async Task<List<PlcResource>> Tree(List<long> resourceIds = null, PlcResourceTreeInput treeInput = null, bool isContainOneself = true)
     {
         long parentId = EasyPlcConst.Zero;//父级ID
-        //获取所有PLC
+        //获取所有PLC资源
         var list = await GetListAsync();
+        var treeList = new List<PlcResource>();
         if (resourceIds != null)
-            list = GetParentListByIds(list, resourceIds);//如果PLCID不为空则获取PLCID列表的所有父节点
+            treeList = GetParentListByIds(list, resourceIds);//如果PLC资源ID不为空则获取PLC资源ID列表的所有父节点
         //如果选择器ID不为空则表示是懒加载,只加载子节点
         if (treeInput != null && treeInput.ParentId != null)
         {
             parentId = treeInput.ParentId.Value;
-            list = GetPlcResourceChilden(list, treeInput.ParentId.Value);//获取下级
+            treeList = GetPlcResourceChilden(list, treeInput.ParentId.Value);//获取下级
+            if (isContainOneself)//如果包含自己
+            {
+                //获取自己的PLC信息
+                var self = list.Where(it => it.Id == parentId).FirstOrDefault();
+                if (self != null) {
+                    parentId = self.ParentId.Value;
+                    treeList.Insert(0, self); 
+                }//如果PLC不为空就插到第一个
+            }
         }
-        list = list.OrderBy(it => it.SortCode).ToList();//排序
+        treeList = treeList.OrderBy(it => it.SortCode).ToList();//排序
         //构建PLC树
-        var result = ConstrucTrees(list, parentId);
+        var result = ConstrucTrees(treeList, parentId);
         return result;
     }
     /// <inheritdoc />

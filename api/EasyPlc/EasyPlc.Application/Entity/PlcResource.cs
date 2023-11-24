@@ -58,7 +58,11 @@ public class PlcResource : BaseEntity
     ///</summary>
     [SugarColumn(ColumnName = "SortCode", ColumnDescription = "排序码", IsNullable = true)]
     public int? SortCode { get; set; }
-
+    /// <summary>
+    /// 内容
+    /// </summary>
+    [SugarColumn(IsIgnore = true)]
+    public dynamic Value { get; set; }
     /// <summary>
     /// 字节点
     /// </summary>
