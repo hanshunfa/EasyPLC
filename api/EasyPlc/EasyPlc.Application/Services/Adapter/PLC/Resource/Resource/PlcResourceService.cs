@@ -16,8 +16,11 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
     }
     public async Task<SqlSugarPagedList<PlcResource>> Page(PlcResourcePageInput input)
     {
+        var list = await GetListAsync();
+        var pIds = list.Select(x => x.ParentId).ToList();
         var query = Context.Queryable<PlcResource>()
-            .Where(it => it.ParentId == input.ParentId)
+            .WhereIF(pIds.Contains(input.ParentId), it => it.ParentId == input.ParentId)
+            .WhereIF(!pIds.Contains(input.ParentId), it => it.Id == input.ParentId)
             .WhereIF(!string.IsNullOrEmpty(input.SearchKey), it => it.Title.Contains(input.SearchKey))//根据关键字查询
             .OrderByIF(!string.IsNullOrEmpty(input.SortField), $"{input.SortField} {input.SortOrder}")
             .OrderBy(it => it.SortCode);//排序
@@ -41,9 +44,10 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
             {
                 //获取自己的PLC信息
                 var self = list.Where(it => it.Id == parentId).FirstOrDefault();
-                if (self != null) {
+                if (self != null)
+                {
                     parentId = self.ParentId.Value;
-                    treeList.Insert(0, self); 
+                    treeList.Insert(0, self);
                 }//如果PLC不为空就插到第一个
             }
         }
@@ -66,7 +70,7 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
     {
         //获取所有型号
         var resources = await GetListAsync();
-        return resources.Where(it=>it.Id == id).FirstOrDefault();
+        return resources.Where(it => it.Id == id).FirstOrDefault();
     }
     /// <inheritdoc/>
     public async Task<List<PlcResource>> GetListAsync(List<string> categoryList = null)
@@ -75,9 +79,9 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
         var plcResources = new List<PlcResource>();
 
         //定义资源分类列表,如果是空的则获取全部资源
-        categoryList = categoryList != null ? categoryList : new List<string> { 
-            CateGoryConst.Resource_BaseData, 
-            CateGoryConst.Resource_StructData, 
+        categoryList = categoryList != null ? categoryList : new List<string> {
+            CateGoryConst.Resource_BaseData,
+            CateGoryConst.Resource_StructData,
             CateGoryConst.Resource_ArrData
         };
         //遍历列表
@@ -108,37 +112,72 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
     {
         int lengh = 0;
         var childList = await GetChildListById(id, false, false);
+
+        int n1 = 0;int n2 = 0;
+        bool bf = true;
+        int bc = 0;
+
         foreach (var child in childList)
         {
-            if(child.Category == "BASEDATA")
+            n1+=1;
+            if (child.Category == "BASEDATA")
             {
-                if (child.ValueType == "Int16") lengh += 2;
-                if (child.ValueType == "UInt16") lengh += 2;
-                if (child.ValueType == "Int32") lengh += 4;
-                if (child.ValueType == "UInt32") lengh += 4;
-                if (child.ValueType == "Float") lengh += 4;
-                if (child.ValueType == "String") lengh += (child.ValueLength + 2);
-                if (child.ValueType == "WString") lengh += (child.ValueLength * 2 + 4);
-            }
-            if(child.Category == "STRUCTDATA")
-            {
-                lengh += await GetLenghAsync(child.Id);
-            }
-            if(child.Category == "ARRDATA")
-            {
-                //正对bool数组特殊处理
-                var c = await GetChildListById(child.Id, false, false);
-                if(c.Count == 1)
+                n2+=1;
+                if (child.ValueType != "Bool")
                 {
-                    if (c[0].ValueType == "Bool")
+                    n2 = n1;
+                    bf = true;
+                    
+                    //内存对其
+                    var y = lengh % 2;
+                    if (y > 0) lengh += 2 - y;
+
+                    if (child.ValueType == "Int16") lengh += 2;
+                    if (child.ValueType == "UInt16") lengh += 2;
+                    if (child.ValueType == "Int32") lengh += 4;
+                    if (child.ValueType == "UInt32") lengh += 4;
+                    if (child.ValueType == "Float") lengh += 4;
+                    if (child.ValueType == "String") lengh += (child.ValueLength + 2);
+                    if (child.ValueType == "WString") lengh += (child.ValueLength * 2 + 4);
+                }
+                else
+                {
+                    //bool 类型需要做特殊处理 需要考虑内存对其方式
+                    bc += 1;
+                    if (bf)
                     {
-                        lengh += (child.ValueLength / 8 + (child.ValueLength % 8 > 0 ? 1 : 0));
+                        bc = 1;
+                        bf = false;
+                        //内存对其
+                        var y = lengh % 2;
+                        if (y > 0) lengh += 2 - y;
+
+                        //占用一个字节
+                        lengh += 1;
+                    }
+                    else
+                    {
+                        var m1 = bc / 8;
+                        var m2 = bc % 8;
+                        if (m1 > 0) { lengh += m1; bc = m2; }
                     }
                 }
-                for (int i = 0; i < child.ValueLength; i ++)
-                {
-                    lengh += await GetLenghAsync(child.Id);
-                }
+            }
+            if (child.Category == "STRUCTDATA")
+            {
+                //内存对其
+                var y = lengh % 2;
+                if (y > 0) lengh += 2 - y;
+                lengh += await GetLenghAsync(child.Id);
+            }
+            if (child.Category == "ARRDATA")
+            {
+                //内存对其
+                var y = lengh % 2;
+                if (y > 0) lengh += 2 - y;
+
+                lengh += await GetLenghAsync(child.Id);
+
             }
         }
         return lengh;
@@ -147,36 +186,67 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
     public async Task<int> GetLenghOneAsync(long id)
     {
         int lengh = 0;
+        var childList = await GetChildListById(id, false, false);
 
-        var plcResour = await GetResurceById(id);
+        int n1 = 0; int n2 = 0;
+        bool bf = true;
+        int bc = 0;
 
-        if (plcResour.Category == "BASEDATA")
+        foreach (var child in childList)
         {
-            if (plcResour.ValueType == "Int16") lengh += 2;
-            if (plcResour.ValueType == "UInt16") lengh += 2;
-            if (plcResour.ValueType == "Int32") lengh += 4;
-            if (plcResour.ValueType == "UInt32") lengh += 4;
-            if (plcResour.ValueType == "Float") lengh += 4;
-            if (plcResour.ValueType == "String") lengh += (plcResour.ValueLength + 2);
-            if (plcResour.ValueType == "WString") lengh += (plcResour.ValueLength * 2 + 4);
-        }
-        if (plcResour.Category == "ARRDATA")
-        {
-            //正对bool数组特殊处理
-            var c = await GetChildListById(plcResour.Id, false, false);
-            if (c.Count == 1)
+            n1 += 1;
+            if (child.Category == "BASEDATA")
             {
-                if (c[0].ValueType == "Bool")
+                n2 += 1;
+                if (child.ValueType != "Bool")
                 {
-                    lengh += (plcResour.ValueLength / 8 + (plcResour.ValueLength % 8 > 0 ? 1 : 0));
+                    n2 = n1;
+                    bf = true;
+
+                    //内存对其
+                    var y = lengh % 2;
+                    if (y > 0) lengh += 2 - y;
+
+                    if (child.ValueType == "Int16") lengh += 2;
+                    if (child.ValueType == "UInt16") lengh += 2;
+                    if (child.ValueType == "Int32") lengh += 4;
+                    if (child.ValueType == "UInt32") lengh += 4;
+                    if (child.ValueType == "Float") lengh += 4;
+                    if (child.ValueType == "String") lengh += (child.ValueLength + 2);
+                    if (child.ValueType == "WString") lengh += (child.ValueLength * 2 + 4);
+                }
+                else
+                {
+                    //bool 类型需要做特殊处理 需要考虑内存对其方式
+                    bc += 1;
+                    if (bf)
+                    {
+                        bc = 1;
+                        bf = false;
+                        //内存对其
+                        var y = lengh % 2;
+                        if (y > 0) lengh += 2 - y;
+
+                        //占用一个字节
+                        lengh += 1;
+                    }
+                    else
+                    {
+                        var m1 = bc / 8;
+                        var m2 = bc % 8;
+                        if (m1 > 0) { lengh += m1; bc = m2; }
+                    }
                 }
             }
+            if (child.Category == "STRUCTDATA")
+            {
+                
+            }
+            if (child.Category == "ARRDATA")
+            {
+                
+            }
         }
-        if (plcResour.Category == "STRUCTDATA")
-        {
-
-        }
-
         return lengh;
     }
 
@@ -191,7 +261,8 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
                 CateGoryConst.Resource_StructData,
                 CateGoryConst.Resource_ArrData
             };
-            listCategory.ForEach( c => {
+            listCategory.ForEach(c =>
+            {
                 _simpleCacheService.Remove(CacheConst.Cache_PlcResource + c);
             });
             ////删除全部key
@@ -328,7 +399,7 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
                     }
                 }
             }
-            
+
             if (await InsertRangeAsync(addResourceList))//插入数据
                 await RefreshCache();//刷新缓存
         }
@@ -348,39 +419,95 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
         var target = resourceList.Where(it => it.Id == input.TargetId).FirstOrDefault();
         if (target != null || input.TargetId == EasyPlcConst.Zero)
         {
-            //需要复制的资源编码列表
-            var orgCodes = resourceList.Where(it => ids.Contains(it.Id)).Select(it => it.Code).ToList();
-            //目标资源的一级子资源名称列表
-            var targetChildCodes = resourceList.Where(it => it.ParentId == input.TargetId).Select(it => it.Code + "_Copy").ToList();
-            orgCodes.ForEach(it =>
+            int count = input.len == 0 ? 1 : input.len;
+            for (int i = 0; i < count; i++)
             {
-                if (targetChildCodes.Contains(it)) throw Oops.Bah($"已存在{it}");
-            });
-
-            foreach (var id in input.Ids)
-            {
-                var res = resourceList.Where(o => o.Id == id).FirstOrDefault();//获取下级
-                if (res != null && !alreadyIds.Contains(id))
+                if (input.Ids.Any(it => it < 0))
                 {
-                    alreadyIds.Add(id);//添加到已复制列表
-                    RedirectPlcResourceChangedName(res);//生成新的实体  只有顶级需要加 _Copy
-                    res.ParentId = input.TargetId;//父id为目标Id
-                    addResourceList.Add(res);
-                    //是否包含下级
-                    if (input.ContainsChild)
+                    //基础对象 -1 bool -2 int16 -3 int32 -4 float -5 string -6 wstring
+                    var vt = string.Empty;
+                    var code = string.Empty;
+                    switch(input.Ids[0])
                     {
-                        var childIds = await GetResouceChildIds(id, false);//获取下级id列表
-                        alreadyIds.AddRange(childIds);//添加到已复制id
-                        var childList = resourceList.Where(c => childIds.Contains(c.Id)).ToList();//获取下级
-                        var addResources = CopyPlcResourceChilden(childList, id, res.Id);//赋值下级资源
-                        addResourceList.AddRange(addResources);
+                        case -1:
+                            vt = "Bool";
+                            code = "B";
+                            break;
+                        case -2:
+                            vt = "Int16";
+                            code = "S";
+                            break;
+                        case -3:
+                            vt = "Int32";
+                            code = "I";
+                            break;
+                        case -4:
+                            vt = "Float";
+                            code = "F";
+                            break;
+                        case -5:
+                            vt = "String";
+                            code = "Str";
+                            break;
+                        case -6:
+                            vt = "WString";
+                            code = "WStr";
+                            break;
+                    }
+                    
+                    var r = new PlcResource();
+
+                    r.Id = CommonUtils.GetSingleId();
+                    r.ParentId = input.TargetId;
+                    r.Title = $"[{i}]";
+                    r.Code = $"{code}{i}";
+                    r.ValueType = vt;
+                    r.Category = "BASEDATA";
+                    r.ValueLength = (int)input.Ids[1];
+                    r.SortCode = i + 1;
+                    addResourceList.Add(r);
+                    
+                }
+                else
+                {
+                    alreadyIds.Clear();
+                    var suffix = input.len == 0 ? "_Copy" : $"[{i}]";//针对于数组特殊处理
+
+                    //需要复制的资源编码列表
+                    var orgCodes = resourceList.Where(it => ids.Contains(it.Id)).Select(it => it.Code).ToList();
+                    //目标资源的一级子资源名称列表
+                    var targetChildCodes = resourceList.Where(it => it.ParentId == input.TargetId).Select(it => it.Code + suffix).ToList();
+                    orgCodes.ForEach(it =>
+                    {
+                        if (targetChildCodes.Contains(it)) throw Oops.Bah($"已存在{it}");
+                    });
+                
+                    //结构体对象
+                    foreach (var id in input.Ids)
+                    {
+                        var res = resourceList.Where(o => o.Id == id).FirstOrDefault().DeepClone();//获取下级
+                        if (res != null && !alreadyIds.Contains(id))
+                        {
+                            alreadyIds.Add(id);//添加到已复制列表
+                            RedirectPlcResourceChangedName(res, null, suffix);//生成新的实体  只有顶级需要加 _Copy
+                            res.ParentId = input.TargetId;//父id为目标Id
+                            if(suffix.Contains("[")) res.SortCode = i + 1;
+                            addResourceList.Add(res);
+                            //是否包含下级
+                            if (input.ContainsChild)
+                            {
+                                var childIds = await GetResouceChildIds(id, false);//获取下级id列表
+                                alreadyIds.AddRange(childIds);//添加到已复制id
+                                var childList = resourceList.Where(c => childIds.Contains(c.Id)).ToList();//获取下级
+                                var addResources = CopyPlcResourceChilden(childList, id, res.Id);//赋值下级资源
+                                addResourceList.AddRange(addResources);
+                            }
+                        }
                     }
                 }
             }
-
             if (await InsertRangeAsync(addResourceList))//插入数据
                 await RefreshCache();//刷新缓存
-
         }
     }
     public async Task<List<PlcResource>> GetCopy(PlcResourceCopyInput input)
@@ -403,6 +530,9 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
                 res.ParentId = input.TargetId;//父id为目标Id
                 var sps = input.StartAddr.Split('.');
                 res.StartAdrr = $"{sps[0]}.{sps[1].ToInt() + input.len}";
+                //地址对其
+                var y = input.len % 2;
+                if (y > 0) input.len += 2 - y;
                 input.len += await GetLenghOneAsync(id);//长度增加
                 addResourceList.Add(res);
                 //是否包含下级
@@ -410,12 +540,12 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
                 {
                     var childIds = await GetResouceChildIds(id, false);//获取下级id列表
                     alreadyIds.AddRange(childIds);//添加到已复制id
-                    var childList = resourceList.Where(c => childIds.Contains(c.Id)).OrderBy(it=>it.SortCode).ToList();//获取下级
+                    var childList = resourceList.Where(c => childIds.Contains(c.Id)).OrderBy(it => it.SortCode).ToList();//获取下级
                     var addResources = await CopyPlcResourceChildenAndLen(input, childList, id, res.Id);//赋值下级资源
                     addResourceList.AddRange(addResources);
                 }
             }
-            
+
         }
         return addResourceList;
     }
@@ -498,7 +628,7 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
     private void RedirectPlcResource(PlcResource res, long? newId = null)
     {
         //重新生成ID并赋值
-        if(newId == null) newId = CommonUtils.GetSingleId();
+        if (newId == null) newId = CommonUtils.GetSingleId();
         res.Id = newId.Value;
         res.CreateTime = DateTime.Now;
         res.CreateUser = UserManager.UserAccount;
@@ -510,7 +640,7 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
     /// 重命名重新生成资源实体
     /// </summary>
     /// <param orgName="org"></param>
-    private void RedirectPlcResourceChangedName(PlcResource res, long? newId = null)
+    private void RedirectPlcResourceChangedName(PlcResource res, long? newId = null, string suffix = "_Copy")
     {
         //重新生成ID并赋值
         if (newId == null) newId = CommonUtils.GetSingleId();
@@ -519,8 +649,8 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
         res.CreateUser = UserManager.UserAccount;
         res.CreateUserId = UserManager.UserId;
         //重命名+_Copy
-        res.Title += "_Copy";
-        res.Code += "_Copy";
+        //res.Title += suffix;
+        res.Code += suffix;
 
         res.SortCode = 9999;//复制的都放在最后面
     }
@@ -548,7 +678,7 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
     public List<PlcResource> CopyPlcResourceChilden(List<PlcResource> resList, long parentId, long newParentId)
     {
         //找下级资源列表
-        var resources = resList.Where(it => it.ParentId == parentId).ToList();
+        var resources = resList.Where(it => it.ParentId == parentId).ToList().DeepClone();
         if (resources.Count > 0)//如果数量大于0
         {
             var data = new List<PlcResource>();
@@ -582,6 +712,9 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
                 item.ParentId = newParentId;//赋值父Id
                 var sps = input.StartAddr.Split('.');
                 item.StartAdrr = $"{sps[0]}.{sps[1].ToInt() + input.len}";
+                //地址对其
+                var y = input.len % 2;
+                if (y > 0) input.len += 2 - y;
                 input.len += await GetLenghOneAsync(id);//计算
                 data.Add(item);//添加到列表
 
@@ -649,10 +782,10 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
     public List<PlcResource> GetResourceBrothers(List<PlcResource> resourceList, long parentId)
     {
         var data = new List<PlcResource>();
-      
+
         //找上级
         var parents = GetResourceParent(resourceList, parentId);
-            
+
         data.AddRange(parents);
         foreach (var item in parents)
         {
@@ -709,7 +842,7 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
         if (resource != null)//如果PLC不为空
         {
             var data = new List<PlcResource>();
-            var parents = GetPlcParents(allPlcList, resource.ParentId??0, includeSelf);//递归获取父节点
+            var parents = GetPlcParents(allPlcList, resource.ParentId ?? 0, includeSelf);//递归获取父节点
             data.AddRange(parents);//添加父节点;
             if (includeSelf)
                 data.Add(resource);//添加到列表

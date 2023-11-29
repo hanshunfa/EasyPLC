@@ -34,12 +34,13 @@ public class ArrDataService : DbRepository<PlcResource>, IArrDataService
     }
 
     /// <inheritdoc />
-    public async Task Add(ArrDataAddInput input)
+    public async Task<long> Add(ArrDataAddInput input)
     {
         await CheckInput(input);//检查参数
         var PlcResource = input.Adapt<PlcResource>();//实体转换
-        if (await InsertAsync(PlcResource))//插入数据
-            await _resourceService.RefreshCache(CateGoryConst.Resource_ArrData);//刷新缓存
+        var entity = await InsertReturnEntityAsync(PlcResource);//插入数据
+        await _resourceService.RefreshCache(CateGoryConst.Resource_ArrData);//刷新缓存
+        return entity.Id;
     }
 
     /// <inheritdoc />
@@ -50,7 +51,6 @@ public class ArrDataService : DbRepository<PlcResource>, IArrDataService
         var titleList = new List<string>() { "新增", "编辑", "删除", "批量删除", "导入", "导出", "批量编辑" };//title前缀
         var idList = new List<long>();//Id列表
         for (var i = 0; i < codeList.Count; i++)
-
         {
             var id = CommonUtils.GetSingleId();
             PlcResources.Add(new PlcResource
@@ -81,14 +81,14 @@ public class ArrDataService : DbRepository<PlcResource>, IArrDataService
     }
 
     /// <inheritdoc />
-    public async Task Edit(ArrDataEditInput input)
+    public async Task<long> Edit(ArrDataEditInput input)
     {
         await CheckInput(input);//检查参数
         var PlcResource = input.Adapt<PlcResource>();//实体转换
         //事务
         var result = await itenant.UseTranAsync(async () =>
         {
-            await UpdateAsync(PlcResource);//更新基础数据
+             await UpdateAsync(PlcResource);//更新基础数据
         });
         if (result.IsSuccess)//如果成功了
         {
@@ -100,6 +100,7 @@ public class ArrDataService : DbRepository<PlcResource>, IArrDataService
             _logger.LogError(result.ErrorMessage, result.ErrorException);
             throw Oops.Oh(ErrorCodeEnum.A0002);
         }
+        return PlcResource.Id;
     }
 
     /// <inheritdoc />
@@ -129,7 +130,32 @@ public class ArrDataService : DbRepository<PlcResource>, IArrDataService
             throw Oops.Oh(ErrorCodeEnum.A0002);
         }
     }
+    public async Task DeleteNoSelf(List<BaseIdInput> input)
+    {
+        //获取所有ID
+        var ids = input.Select(it => it.Id).ToList();
 
+        //事务
+        var result = await itenant.UseTranAsync(async () =>
+        {
+            var deleteIds = new List<long>();
+            for (var i = 0; i < ids.Count; i++)
+            {
+                deleteIds.AddRange((await _resourceService.GetChildListById(ids[i], false, true)).Select(it => it.Id).ToList());
+            }
+            await base.DeleteByIdAsync(deleteIds.Cast<object>().ToArray());
+        });
+        if (result.IsSuccess)//如果成功了
+        {
+            await _resourceService.RefreshCache();//资源表基础数据刷新缓存
+        }
+        else
+        {
+            //写日志
+            _logger.LogError(result.ErrorMessage, result.ErrorException);
+            throw Oops.Oh(ErrorCodeEnum.A0002);
+        }
+    }
     #region 方法
 
     /// <summary>
@@ -156,6 +182,7 @@ public class ArrDataService : DbRepository<PlcResource>, IArrDataService
             throw Oops.Bah($"不存在的父级:{plcResource.ParentId}");
         plcResource.Category = CateGoryConst.Resource_ArrData;//设置分类为基础数据
     }
+
 
     #endregion 方法
 }

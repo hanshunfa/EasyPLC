@@ -56,9 +56,9 @@ public class ArrDataController : AllowAnonymousController
     /// <param name="input">添加参数</param>
     /// <returns></returns>
     [HttpPost("add")]
-    public async Task Add([FromBody] ArrDataAddInput input)
+    public async Task<long> Add([FromBody] ArrDataAddInput input)
     {
-        await _arrDataService.Add(input);
+        return await _arrDataService.Add(input);
     }
 
     /// <summary>
@@ -82,6 +82,16 @@ public class ArrDataController : AllowAnonymousController
     {
         await _arrDataService.Delete(input);
     }
+    /// <summary>
+    /// 删除基础数据不包含自己
+    /// </summary>
+    /// <param name="input">删除参数</param>
+    /// <returns></returns>
+    [HttpPost("deleteNoSelf")]
+    public async Task DeleteNoSelf([FromBody] List<BaseIdInput> input)
+    {
+        await _arrDataService.DeleteNoSelf(input);
+    }
 
     /// <summary>
     /// 编辑基础数据
@@ -89,8 +99,8 @@ public class ArrDataController : AllowAnonymousController
     /// <param name="input">编辑参数</param>
     /// <returns></returns>
     [HttpPost("edit")]
-    public async Task Edit([FromBody] ArrDataEditInput input)
+    public async Task<long> Edit([FromBody] ArrDataEditInput input)
     {
-        await _arrDataService.Edit(input);
+        return await _arrDataService.Edit(input);
     }
 }

@@ -10,7 +10,7 @@ public interface IArrDataService : ITransient
     /// </summary>
     /// <param name="input">添加参数</param>
     /// <returns></returns>
-    Task Add(ArrDataAddInput input);
+    Task<long> Add(ArrDataAddInput input);
 
     /// <summary>
     /// 批量添加
@@ -25,13 +25,19 @@ public interface IArrDataService : ITransient
     /// <param name="input">删除参数</param>
     /// <returns></returns>
     Task Delete(List<BaseIdInput> input);
+    /// <summary>
+    /// 删除数据不包含自己
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    Task DeleteNoSelf(List<BaseIdInput> input);
 
     /// <summary>
     /// 编辑基础数据
     /// </summary>
     /// <param name="input">编辑参数</param>
     /// <returns></returns>
-    Task Edit(ArrDataEditInput input);
+    Task<long> Edit(ArrDataEditInput input);
 
     /// <summary>
     /// 基础数据分页查询

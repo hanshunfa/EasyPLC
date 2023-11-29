@@ -85,7 +85,7 @@ public class PlcResourceController : AllowAnonymousController
     /// <param name="category">分类名称</param>
     /// <returns>资源列表</returns>
     [HttpGet("listByCategory")]
-    public async Task<List<PlcResource>> GetListByCategory(string category)
+    public async Task<List<PlcResource>> GetListByCategory([FromQuery] string category)
     {
         return await _plcResourceService.GetListByCategory(category);
     }
