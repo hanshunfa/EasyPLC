@@ -42,6 +42,11 @@ public class PlcResource : BaseEntity
     [SugarColumn(ColumnName = "ValueLength", ColumnDescription = "数据长度")]
     public int ValueLength { get; set; }
     /// <summary>
+    /// 暂用字节数量
+    /// </summary>
+    [SugarColumn(ColumnName = "ByteCount", ColumnDescription = "暂用字节数量")]
+    public int ByteCount { get; set; }
+    /// <summary>
     /// 分类
     ///</summary>
     [SugarColumn(ColumnName = "Category", ColumnDescription = "分类", Length = 200)]

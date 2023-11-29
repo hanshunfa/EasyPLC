@@ -2,8 +2,6 @@
 using HslCommunication;
 using System.Collections.Concurrent;
 using EasyPlc.Plugin.Plc.Utils;
-using Mapster;
-using Masuit.Tools;
 
 namespace EasyPlc.Plugin.Plc;
 
@@ -69,10 +67,6 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
 
 
         //等会再写
-
-
-
-
 
         if (_plc == null)
         {

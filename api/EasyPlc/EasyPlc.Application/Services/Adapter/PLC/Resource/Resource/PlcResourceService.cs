@@ -112,69 +112,19 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
     {
         int lengh = 0;
         var childList = await GetChildListById(id, false, false);
-
-        int n1 = 0;int n2 = 0;
-        bool bf = true;
-        int bc = 0;
-
         foreach (var child in childList)
         {
-            n1+=1;
             if (child.Category == "BASEDATA")
             {
-                n2+=1;
-                if (child.ValueType != "Bool")
-                {
-                    n2 = n1;
-                    bf = true;
-                    
-                    //内存对其
-                    var y = lengh % 2;
-                    if (y > 0) lengh += 2 - y;
-
-                    if (child.ValueType == "Int16") lengh += 2;
-                    if (child.ValueType == "UInt16") lengh += 2;
-                    if (child.ValueType == "Int32") lengh += 4;
-                    if (child.ValueType == "UInt32") lengh += 4;
-                    if (child.ValueType == "Float") lengh += 4;
-                    if (child.ValueType == "String") lengh += (child.ValueLength + 2);
-                    if (child.ValueType == "WString") lengh += (child.ValueLength * 2 + 4);
-                }
-                else
-                {
-                    //bool 类型需要做特殊处理 需要考虑内存对其方式
-                    bc += 1;
-                    if (bf)
-                    {
-                        bc = 1;
-                        bf = false;
-                        //内存对其
-                        var y = lengh % 2;
-                        if (y > 0) lengh += 2 - y;
-
-                        //占用一个字节
-                        lengh += 1;
-                    }
-                    else
-                    {
-                        var m1 = bc / 8;
-                        var m2 = bc % 8;
-                        if (m1 > 0) { lengh += m1; bc = m2; }
-                    }
-                }
+                lengh += child.ByteCount;
             }
             if (child.Category == "STRUCTDATA")
             {
-                //内存对其
-                var y = lengh % 2;
-                if (y > 0) lengh += 2 - y;
+
                 lengh += await GetLenghAsync(child.Id);
             }
             if (child.Category == "ARRDATA")
             {
-                //内存对其
-                var y = lengh % 2;
-                if (y > 0) lengh += 2 - y;
 
                 lengh += await GetLenghAsync(child.Id);
 
@@ -186,66 +136,19 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
     public async Task<int> GetLenghOneAsync(long id)
     {
         int lengh = 0;
-        var childList = await GetChildListById(id, false, false);
+        var plcResour = await GetResurceById(id);
 
-        int n1 = 0; int n2 = 0;
-        bool bf = true;
-        int bc = 0;
-
-        foreach (var child in childList)
+        if (plcResour.Category == "BASEDATA")
         {
-            n1 += 1;
-            if (child.Category == "BASEDATA")
-            {
-                n2 += 1;
-                if (child.ValueType != "Bool")
-                {
-                    n2 = n1;
-                    bf = true;
+            lengh = plcResour.ByteCount;
+        }
+        if (plcResour.Category == "ARRDATA")
+        {
+           
+        }
+        if (plcResour.Category == "STRUCTDATA")
+        {
 
-                    //内存对其
-                    var y = lengh % 2;
-                    if (y > 0) lengh += 2 - y;
-
-                    if (child.ValueType == "Int16") lengh += 2;
-                    if (child.ValueType == "UInt16") lengh += 2;
-                    if (child.ValueType == "Int32") lengh += 4;
-                    if (child.ValueType == "UInt32") lengh += 4;
-                    if (child.ValueType == "Float") lengh += 4;
-                    if (child.ValueType == "String") lengh += (child.ValueLength + 2);
-                    if (child.ValueType == "WString") lengh += (child.ValueLength * 2 + 4);
-                }
-                else
-                {
-                    //bool 类型需要做特殊处理 需要考虑内存对其方式
-                    bc += 1;
-                    if (bf)
-                    {
-                        bc = 1;
-                        bf = false;
-                        //内存对其
-                        var y = lengh % 2;
-                        if (y > 0) lengh += 2 - y;
-
-                        //占用一个字节
-                        lengh += 1;
-                    }
-                    else
-                    {
-                        var m1 = bc / 8;
-                        var m2 = bc % 8;
-                        if (m1 > 0) { lengh += m1; bc = m2; }
-                    }
-                }
-            }
-            if (child.Category == "STRUCTDATA")
-            {
-                
-            }
-            if (child.Category == "ARRDATA")
-            {
-                
-            }
         }
         return lengh;
     }
@@ -530,9 +433,6 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
                 res.ParentId = input.TargetId;//父id为目标Id
                 var sps = input.StartAddr.Split('.');
                 res.StartAdrr = $"{sps[0]}.{sps[1].ToInt() + input.len}";
-                //地址对其
-                var y = input.len % 2;
-                if (y > 0) input.len += 2 - y;
                 input.len += await GetLenghOneAsync(id);//长度增加
                 addResourceList.Add(res);
                 //是否包含下级

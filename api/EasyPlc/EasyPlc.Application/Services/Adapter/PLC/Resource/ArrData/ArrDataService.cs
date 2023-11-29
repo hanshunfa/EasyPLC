@@ -180,6 +180,8 @@ public class ArrDataService : DbRepository<PlcResource>, IArrDataService
         //判断父级是否存在
         if (plcResource.ParentId != 0 && !dataList.Any(it => it.Id == plcResource.ParentId))
             throw Oops.Bah($"不存在的父级:{plcResource.ParentId}");
+
+        //自动补充和地址对齐
         plcResource.Category = CateGoryConst.Resource_ArrData;//设置分类为基础数据
     }
 

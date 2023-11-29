@@ -1,4 +1,6 @@
-﻿namespace EasyPlc.Application;
+﻿using Org.BouncyCastle.Asn1.Ocsp;
+
+namespace EasyPlc.Application;
 
 /// <summary>
 /// <inheritdoc cref="IBaseDataService"/>
@@ -162,10 +164,40 @@ public class BaseDataService : DbRepository<PlcResource>, IBaseDataService
         if (plcResource.ParentId != 0 && !dataList.Any(it => it.Id == plcResource.ParentId))
             throw Oops.Bah($"不存在的父级:{plcResource.ParentId}");
 
-        //基础类型自动填写所占字节数量
-       
-
+        //自动补充和地址对齐
         plcResource.Category = CateGoryConst.Resource_BaseData;//设置分类为基础数据
+
+        int lengh = 0;
+        if (plcResource.ValueType == "Int16") lengh = 2;
+        else if (plcResource.ValueType == "UInt16") lengh = 2;
+        else if (plcResource.ValueType == "Int32") lengh = 4;
+        else if (plcResource.ValueType == "UInt32") lengh = 4;
+        else if (plcResource.ValueType == "Float") lengh = 4;
+        else if(plcResource.ValueType == "String") lengh = (plcResource.ValueLength + 2);
+        else if (plcResource.ValueType == "WString") lengh = (plcResource.ValueLength * 2 + 4);
+
+        else if (plcResource.ValueType == "Bool[]")
+        {
+            //至少16整数倍
+            var m = plcResource.ValueLength / 16;
+            var n = plcResource.ValueLength % 16;
+            plcResource.ValueLength = (m + (n > 0 ? 1 : 0)) * 16;
+            lengh = plcResource.ValueLength / 8;
+        }
+        else if (plcResource.ValueType == "Int16[]")
+        {
+            lengh = plcResource.ValueLength * 2;
+        }
+        else if (plcResource.ValueType == "Int32[]")
+        {
+            lengh = plcResource.ValueLength * 4;
+        }
+        else if (plcResource.ValueType == "Float[]")
+        {
+            lengh = plcResource.ValueLength * 4;
+        }
+
+        plcResource.ByteCount = lengh;//所占字节数量
     }
 
     #endregion 方法

@@ -28,6 +28,7 @@ using AngleSharp.Css.Values;
 using HslCommunication;
 using HslCommunication.Core;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using Org.BouncyCastle.Utilities;
 
 namespace EasyPlc.Plugin.Plc.Utils;
 
@@ -55,11 +56,10 @@ public static class SiemensPaseUtil
                 }
                 else if (r.Category == "ARRDATA")//数组
                 {
-                    //后续处理。。。
+                    continue;
                 }
                 else if (r.Category == "BASEDATA")
                 {
-
                     int len = r.ValueLength;//所暂用的字节数量
                     if (r.ValueType.ToLower() == "byte")
                     {
@@ -132,7 +132,6 @@ public static class SiemensPaseUtil
                         r.Value = s;
                     }
                     //........后续新增
-
                     startIndex += len;
                 }
                 //准备递归
@@ -298,4 +297,5 @@ public static class SiemensPaseUtil
             return null;
         }
     }
+    
 }
