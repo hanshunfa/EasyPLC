@@ -47,6 +47,15 @@ public class SiemensPlcFactoryController : AllowAnonymousController
         return await _siemensPlcFactoryService.InitFactory();
     }
     /// <summary>
+    /// 关闭工厂
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("closeFactory")]
+    public async Task<string> CloseFactory()
+    {
+        return await Task.FromResult(_siemensPlcFactoryService.CloseFactory());
+    }
+    /// <summary>
     /// 全部开始
     /// </summary>
     /// <param name="connectionSiemensPLC"></param>
@@ -62,19 +71,20 @@ public class SiemensPlcFactoryController : AllowAnonymousController
     /// <param name="ip"></param>
     /// <returns></returns>
     [HttpPost("startByIp")]
-    public async Task<string> StartPLC([FromBody] string ip)
+    public async Task<string> StartPLC([FromBody] StartPlcInput input)
     {
-        return await Task.FromResult(_siemensPlcFactoryService.StartPLC(ip));
+        return await Task.FromResult(_siemensPlcFactoryService.StartPLC(input.Ip));
     }
+   
     /// <summary>
     /// 结束
     /// </summary>
     /// <param name="ip"></param>
     /// <returns></returns>
     [HttpPost("stopByIp")]
-    public async Task<string> StopPLC([FromBody] string ip)
+    public async Task<string> StopPLC([FromBody] StartPlcInput input)
     {
-        return await Task.FromResult(_siemensPlcFactoryService.StopPLC(ip));
+        return await Task.FromResult(_siemensPlcFactoryService.StopPLC(input.Ip));
     }
     /// <summary>
     /// 全部结束

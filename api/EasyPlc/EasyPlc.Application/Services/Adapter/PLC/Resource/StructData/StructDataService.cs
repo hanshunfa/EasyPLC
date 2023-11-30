@@ -49,7 +49,11 @@ public class StructDataService : DbRepository<PlcResource>, IStructDataService
         await CheckInput(input, true);//检查参数
         var plcResource = input.Adapt<PlcResource>();//实体转换
         if (await InsertAsync(plcResource))//插入数据
+        {
             await _resourceService.RefreshCache(CateGoryConst.Resource_StructData);//刷新缓存
+            //排序
+            await _resourceService.Sort(new PlcResourceSortInput { Pid = input.ParentId.Value });
+        }
     }
 
     /// <inheritdoc />

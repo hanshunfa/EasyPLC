@@ -40,6 +40,8 @@ public class ArrDataService : DbRepository<PlcResource>, IArrDataService
         var PlcResource = input.Adapt<PlcResource>();//实体转换
         var entity = await InsertReturnEntityAsync(PlcResource);//插入数据
         await _resourceService.RefreshCache(CateGoryConst.Resource_ArrData);//刷新缓存
+        //排序
+        await _resourceService.Sort(new PlcResourceSortInput { Pid = input.ParentId.Value});
         return entity.Id;
     }
 
@@ -92,7 +94,8 @@ public class ArrDataService : DbRepository<PlcResource>, IArrDataService
         });
         if (result.IsSuccess)//如果成功了
         {
-            await _resourceService.RefreshCache(CateGoryConst.Resource_ArrData);//资源表基础数据刷新缓存
+            //资源表基础数据刷新缓存
+            await _resourceService.RefreshCache(CateGoryConst.Resource_ArrData);
         }
         else
         {

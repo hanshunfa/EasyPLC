@@ -1,7 +1,4 @@
-﻿using Castle.Core.Resource;
-using Masuit.Tools;
-
-namespace EasyPlc.Application;
+﻿namespace EasyPlc.Application;
 
 public class AddressService : DbRepository<PlcAddress>, IAddressService
 {
@@ -128,7 +125,7 @@ public class AddressService : DbRepository<PlcAddress>, IAddressService
             //排序变更
             foreach(var column in input.Columns)
             {
-                var addr = addrList.Where(it => it.Id == column.PlcId).FirstOrDefault();
+                var addr = addrList.Where(it => it.Id == column.Id).FirstOrDefault();
                 if(addr != null)
                 {
                     addr.SortCode = column.Sort;

@@ -104,7 +104,8 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
         if (PlcInfo != null && PlcInfo.IsConn)
         {
             _mre.Set();
-            
+            //等待plc关闭
+            while (_plc != null) { Thread.Sleep(100); }
         }
 
         return ret;
@@ -186,7 +187,7 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
             var eventTrigger = PlcInfo.PI.ObjR.GetResourceWithEventTrigger();
             if(eventTrigger == null)
             {
-                OnErr?.Invoke($"{PlcInfo.Name}公共区配置中缺少【】");
+                OnErr?.Invoke($"{PlcInfo.Name}公共区配置中缺少【EventTrigger】");
                 continue;
             }
             var bitTarger = eventTrigger.Value;//配置时候保证一定是bool[]类型
@@ -213,6 +214,13 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
                                 continue;
                             }
                             PlcInfo.EIs[i].ObjW.ReadTree(opW.Content);
+                            var sequenceIdw = PlcInfo.EIs[i].ObjW.GetResourceWithSequenceID();
+                            if (sequenceIdw == null)
+                            {
+                                OnErr.Invoke($"事件{PlcInfo.EIs[i].WriteClassName}配置中缺少【SequenceID】");
+                                continue;
+                            }
+                            PlcInfo.EIs[i].SequenceIDW = sequenceIdw.Value;
                         }
 
 
@@ -232,14 +240,19 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
 
                         //更新事件实例内容
                         PlcInfo.EIs[i].ObjR.ReadTree(opR.Content);
-
-                        PlcInfo.EIs[i].SequenceIDR = PlcInfo.EIs[i].ObjR.GetResourceWithSequenceID().Value;
+                        var sequenceIdr = PlcInfo.EIs[i].ObjW.GetResourceWithSequenceID();
+                        if (sequenceIdr == null)
+                        {
+                            OnErr.Invoke($"事件{PlcInfo.EIs[i].ReadClassName}配置中缺少【SequenceID】");
+                            continue;
+                        }
+                        PlcInfo.EIs[i].SequenceIDR = sequenceIdr.Value;
                         //查看 SequenceID
                         if (PlcInfo.EIs[i].SequenceIDW != PlcInfo.EIs[i].SequenceIDR)
                         {
                             PlcInfo.EIs[i].TriggerCompleted = true;
                             //回调事件处理
-                            OnEventCallback.Invoke(PlcInfo.Name, PlcInfo.EIs[i]);
+                            OnEventCallback?.Invoke(PlcInfo.Name, PlcInfo.EIs[i]);
                         }
                         else
                         {
@@ -265,12 +278,13 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
     }
     private void WirteToPLC(EventInfo ei)
     {
-        SiemensRefelectionUtil.Object2Buffer(ei.ObjW, ei.WriteBuffer);
-
-        var result = _plc.Write(ei.WriteAddr, ei.WriteBuffer);
+        //转换
+        var buffs = ei.ObjW.WriteBuffer();
+        //写PLC
+        var result = _plc.Write(ei.WriteAddr, buffs);
         if (!result.IsSuccess)
         {
-            OnErr?.Invoke($"{PlcInfo.Name}第{ei.Idx}个事件{ei.WriteClassName}写入PLC失败");
+            OnErr?.Invoke($"{PlcInfo.Name}事件区写入PLC失败");
         }
         else
         {
@@ -279,11 +293,13 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
     }
     private void WirteToPLC2(EventInfo ei)
     {
-        SiemensRefelectionUtil.Object2Buffer(ei.ObjW, ei.WriteBuffer);
-        var result = _plc.Write(ei.WriteAddr, ei.WriteBuffer);
+        //转换
+        var buffs = ei.ObjW.WriteBuffer();
+        //写PLC
+        var result = _plc.Write(ei.WriteAddr, buffs);
         if (!result.IsSuccess)
         {
-            OnInfo?.Invoke($"{PlcInfo.Name}第{ei.Idx}个事件{ei.WriteClassName}非第一次写入PLC失败");
+            OnInfo?.Invoke($"{PlcInfo.Name}事件区写入PLC失败");
         }
         else
         {

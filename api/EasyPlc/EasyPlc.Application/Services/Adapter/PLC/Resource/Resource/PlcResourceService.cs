@@ -249,7 +249,7 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
         {
             //redis没有就去数据库拿
             plcResources = await base.GetListAsync(it => it.Category == category);
-            if (plcResources.Count > 0)
+            if (plcResources != null)
             {
                 //插入Redis
                 _simpleCacheService.Set(CacheConst.Cache_PlcResource + category, plcResources);
@@ -790,6 +790,39 @@ public class PlcResourceService : DbRepository<PlcResource>, IPlcResourceService
             return data;//返回结果
         }
         return new List<PlcResource>();
+    }
+
+    public async Task Sort(PlcResourceSortInput input)
+    {
+
+        var cList = await GetChildListById(input.Pid, false, false);
+        //排序时候以10的整数倍，方便后续操作
+        if (input.Columns == null || input.Columns.Count == 0)
+        {
+            //整理排序
+            for (int i = 0; i < cList.Count; i++)
+            {
+                cList[i].SortCode = (i + 1) * 10;
+            }
+            await UpdateRangeAsync(cList);
+            await RefreshCache();
+        }
+        else
+        {
+            //排序变更
+            foreach (var column in input.Columns)
+            {
+                var addr = cList.Where(it => it.Id == column.Id).FirstOrDefault();
+                if (addr != null)
+                {
+                    addr.SortCode = column.Sort;
+                }
+            }
+            await UpdateRangeAsync(cList);
+            await RefreshCache();
+            await Sort(new PlcResourceSortInput { Pid = input.Pid});
+        }
+
     }
 
     #endregion 方法

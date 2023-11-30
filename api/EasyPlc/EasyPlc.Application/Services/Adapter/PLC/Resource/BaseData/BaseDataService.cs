@@ -41,7 +41,11 @@ public class BaseDataService : DbRepository<PlcResource>, IBaseDataService
         await CheckInput(input);//检查参数
         var PlcResource = input.Adapt<PlcResource>();//实体转换
         if (await InsertAsync(PlcResource))//插入数据
+        {
             await _resourceService.RefreshCache(CateGoryConst.Resource_BaseData);//刷新缓存
+            //排序
+            await _resourceService.Sort(new PlcResourceSortInput { Pid = input.ParentId.Value });
+        }
     }
 
     /// <inheritdoc />

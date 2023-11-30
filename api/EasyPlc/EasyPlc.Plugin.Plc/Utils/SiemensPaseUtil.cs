@@ -29,6 +29,7 @@ using HslCommunication;
 using HslCommunication.Core;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using Org.BouncyCastle.Utilities;
+using System.Resources;
 
 namespace EasyPlc.Plugin.Plc.Utils;
 
@@ -44,23 +45,14 @@ public static class SiemensPaseUtil
     }
     public static void ReadTreeWithChildren(this List<PlcResource> resources, byte[] buffer, ref int startIndex, IByteTransform byteTransform)
     {
-        if(resources == null && resources.Count > 0)
+        if(resources != null && resources.Count > 0)
         {
             for (int i = 0; i < resources.Count; i++)
             {
                 var r = resources[i];
-
-                if (r.Category == "STRUCTDATA")//结构体
+                if (r.Category == "BASEDATA")
                 {
-                    continue;
-                }
-                else if (r.Category == "ARRDATA")//数组
-                {
-                    continue;
-                }
-                else if (r.Category == "BASEDATA")
-                {
-                    int len = r.ValueLength;//所暂用的字节数量
+                    int len = r.ByteCount;//所暂用的字节数量
                     if (r.ValueType.ToLower() == "byte")
                     {
                         r.Value = buffer[startIndex];
@@ -134,10 +126,13 @@ public static class SiemensPaseUtil
                     //........后续新增
                     startIndex += len;
                 }
-                //准备递归
-                if(r.Children != null && r.Children.Count > 0)
+                else if(r.Category == "STRUCTDATA" || r.Category == "ARRDATA")//结构体
                 {
-                    r.Children.ReadTreeWithChildren(buffer, ref startIndex, byteTransform);
+                    //准备递归
+                    if (r.Children != null && r.Children.Count > 0)
+                    {
+                        r.Children.ReadTreeWithChildren(buffer, ref startIndex, byteTransform);
+                    }
                 }
             }
         }
@@ -287,10 +282,17 @@ public static class SiemensPaseUtil
     {
         if(resources != null && resources.Count > 0)
         {
-            var r = resources.Where(it => it.Code == key).FirstOrDefault();
-            if(r != null) { return r; }
-            //递归查找
-            return r.Children.GetResourceWithKey(key);
+            for (int i = 0; i < resources.Count; i++)
+            {
+                if (resources[i].Code == key)
+                {
+                    return resources[i];
+                }
+                //递归查找
+                var r = resources[i].Children.GetResourceWithKey(key);
+                if(r != null) return r;
+            }
+            return null;
         }
         else
         {

@@ -35,7 +35,7 @@ public class PlcResourceCopyInput
     public bool ContainsChild { get; set; } = false;
 }
 /// <summary>
-/// 组织树查询参数
+/// 树查询参数
 /// 懒加载用
 /// </summary>
 public class PlcResourceTreeInput
@@ -44,4 +44,12 @@ public class PlcResourceTreeInput
     /// 父Id
     /// </summary>
     public long? ParentId { get; set; }
+}
+/// <summary>
+/// 排序参数
+/// </summary>
+public class PlcResourceSortInput: BaseSortInput
+{
+    [Required(ErrorMessage = "Pid不能为空")]
+    public long Pid { get; set; }
 }

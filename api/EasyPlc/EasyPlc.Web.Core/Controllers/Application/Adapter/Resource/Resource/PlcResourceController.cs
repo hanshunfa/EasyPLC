@@ -139,4 +139,14 @@ public class PlcResourceController : AllowAnonymousController
     {
         await _plcResourceService.Cut(input);
     }
+    /// <summary>  
+    /// 排序
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    [HttpPost("sort")]
+    public async Task Sort([FromBody]PlcResourceSortInput input)
+    {
+        await _plcResourceService.Sort(input);
+    }
 }

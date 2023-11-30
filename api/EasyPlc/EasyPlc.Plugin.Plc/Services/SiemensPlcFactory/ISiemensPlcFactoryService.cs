@@ -13,6 +13,11 @@ public interface ISiemensPlcFactoryService : ISingleton
     /// </summary>
     Task<string> InitFactory();
     /// <summary>
+    /// 关闭工厂
+    /// </summary>
+    /// <returns></returns>
+    string CloseFactory();
+    /// <summary>
     /// 全部开始
     /// </summary>
     /// <param name="connectionSiemensPLC"></param>

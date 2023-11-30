@@ -62,7 +62,7 @@ public class SiemensPLCInfoUtil : IGenSiemensPlcInfoUtil
                 //每个对象对应一颗树
                 var tree = await _plcResourceService.Tree(null, new PlcResourceTreeInput { ParentId = rObj.Id }, true);
                 pi.ObjR = tree;
-                var lr = await _plcResourceService.GetLenghAsync(ggqR.Id);
+                var lr = await _plcResourceService.GetLenghAsync(rObj.Id);
                 pi.ReadLen = (ushort)lr;
             }
             var ggqW = childs.Where(it => it.Category == "GGQ-W").FirstOrDefault();
@@ -78,7 +78,7 @@ public class SiemensPLCInfoUtil : IGenSiemensPlcInfoUtil
                 //每个对象对应一颗树
                 var tree = await _plcResourceService.Tree(null, new PlcResourceTreeInput { ParentId = wObj.Id }, true);
                 pi.ObjW = tree;
-                var lw = await _plcResourceService.GetLenghAsync(ggqW.Id);
+                var lw = await _plcResourceService.GetLenghAsync(wObj.Id);
                 pi.WriteLen = (ushort)lw;
                 pi.IsReset = true;
             }

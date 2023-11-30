@@ -9,8 +9,8 @@
     "UseMqtt": false, // 是否开启mqtt
     "NoticeComponent": "SignalR", //默认通知组件类型SignalR/Mqtt
     "SiemensPlc": {
-      "IsUse": false,//是否启用
-      "IsInitFactory": true,//是否初始化工厂，配置好后建议使用，保证每次都能第一时间连上PLC
+      "IsUse": true,//是否启用
+      "IsInitFactory": false,//是否初始化工厂，配置好后建议使用，保证每次都能第一时间连上PLC
     }
   },
   //jwt设置

@@ -119,5 +119,10 @@ public interface IPlcResourceService : ITransient
     /// <param name="category">分类名称</param>
     /// <returns></returns>
     Task RefreshCache(string category = null);
-
+    /// <summary>
+    /// 排序
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    Task Sort(PlcResourceSortInput input);
 }

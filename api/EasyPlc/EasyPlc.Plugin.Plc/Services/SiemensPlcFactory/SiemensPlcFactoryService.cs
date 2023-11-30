@@ -24,10 +24,6 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
     /// </summary>
     public async Task<string> InitFactory()
     {
-        await _genSiemensPlcInfoUtil.GenSiemensPLCInfoList();
-
-
-
         if (!IsUse) return "工厂不能使用，请联系管理员";
         if (ListConnectionSiemensPLC.Count > 0) return "工厂已存在";
         //根据动态生成的PLC信息，若返回NULL，表示PLC还没有动态生成
@@ -41,6 +37,19 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
             ListConnectionSiemensPLC.Add(connectionSiemensPLC);
         }
 
+        return "成功";
+    }
+    /// <summary>
+    /// 关闭工厂
+    /// </summary>
+    /// <returns></returns>
+    public string CloseFactory()
+    {
+        if (!IsUse) return "工厂不能使用，请联系管理员";
+        if (ListConnectionSiemensPLC.Count == 0) return "工厂不存在";
+        //关闭所有PLC
+        StopPLC();
+        ListConnectionSiemensPLC.Clear();
         return "成功";
     }
     public void StartPLC()
