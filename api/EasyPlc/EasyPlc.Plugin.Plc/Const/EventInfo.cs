@@ -44,4 +44,6 @@ public class EventInfo
     public int SequenceIDW { get; set; } = -1;
     public List<PlcResource> ObjR { get; set; }
     public List<PlcResource> ObjW { get; set; }
+    public DateTime ReadTime { get; set; }
+    public DateTime SendTime { get; set; }
 }

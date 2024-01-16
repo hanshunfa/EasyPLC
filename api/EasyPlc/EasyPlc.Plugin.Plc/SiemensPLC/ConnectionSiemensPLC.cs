@@ -13,16 +13,16 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
     public SiemensPlcInfo PlcInfo { get; set; } = null;
 
     //定义回调事件
-    public delegate void Err(string errMsg);
+    public delegate Task Err(string errMsg);
     public event Err OnErr;
 
-    public delegate void Info(string Info);
+    public delegate Task Info(string Info);
     public event Info OnInfo;
 
-    public delegate void PublicCallback(PublicInfo publicInfo);
+    public delegate Task PublicCallback(SiemensPlcInfo plc);
     public event PublicCallback OnPublicCallback;
 
-    public delegate void EventCallback(string op, EventInfo ei);
+    public delegate Task EventCallback(SiemensPlcInfo plc, int eventIdx);
     public event EventCallback OnEventCallback;
 
     private PublicInfo _writePi = null;
@@ -33,10 +33,15 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
         _mre = new ManualResetEvent(false);
         _queueHandleEventCompleted = new ConcurrentQueue<EventInfo>();
     }
-    public void SetWritePi(PublicInfo publicInfo)
+    public bool SetWritePi(PublicInfo publicInfo)
     {
-        //使用值转递
-        _writePi = publicInfo.DeepClone();
+        if (PlcInfo.IsConn)
+        {
+            //使用值转递
+            _writePi = publicInfo.DeepClone();
+            return true;
+        }
+        return false;
     }
     /// <summary>
     /// 设置PLCInfo
@@ -50,9 +55,14 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
     /// 事件写
     /// </summary>
     /// <param name="ei"></param>
-    public void SetEventInfo(EventInfo ei)
+    public bool SetEventInfo(EventInfo ei)
     {
-        _queueHandleEventCompleted.Enqueue(ei);//丢入写队列中
+        if (PlcInfo.IsConn)
+        {
+            _queueHandleEventCompleted.Enqueue(ei);//丢入写队列中
+            return true;
+        }
+        return false;
     }
     /// <summary>
     /// 启动plc
@@ -112,7 +122,7 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
 
     }
 
-    private void WorkThread()
+    private async void WorkThread()
     {
         _mre.Reset();
         while (!_mre.WaitOne(10))
@@ -132,17 +142,18 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
             OperateResult<byte[]> operateResult01 = _plc.Read(PlcInfo.PI.ReadAddr, PlcInfo.PI.ReadLen);
             if (!operateResult01.IsSuccess)
             {
-                OnErr?.Invoke($"{PlcInfo.Name}PLC公共区读取失败：{operateResult01.Message}");
+                await OnErr?.Invoke($"{PlcInfo.Name}PLC公共区读取失败：{operateResult01.Message}");
                 continue;
             }
             //判断长度是否与定义的一致
             if (operateResult01.Content.Length != PlcInfo.PI.ReadLen)
             {
                 //在读一次
-                OnErr?.Invoke($"{PlcInfo.Name}PLC公共区读取长度[{operateResult01.Content.Length}]与定义[{PlcInfo.PI.ReadLen}]的不一致");
+                await OnErr?.Invoke($"{PlcInfo.Name}PLC公共区读取长度[{operateResult01.Content.Length}]与定义[{PlcInfo.PI.ReadLen}]的不一致");
                 continue;
             }
             //解析byte[]到指定特性对象种
+            PlcInfo.PI.ReadTime = DateTime.Now;//读到时候时间
             PlcInfo.PI.ObjR.ReadTree(operateResult01.Content);
             //读取PC公共区 只需要读取一次
             if (PlcInfo.PI.IsReset)
@@ -152,21 +163,21 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
                 OperateResult<byte[]> operateResult02 = _plc.Read(PlcInfo.PI.WriteAddr, PlcInfo.PI.WriteLen);
                 if (!operateResult02.IsSuccess)
                 {
-                    OnErr?.Invoke($"{PlcInfo.Name}PLC公共区读取失败：{operateResult02.Message}");
+                    await OnErr?.Invoke($"{PlcInfo.Name}PLC公共区读取失败：{operateResult02.Message}");
                     continue;
                 }
                 //判断长度是否与定义的一致
                 if (operateResult02.Content.Length != PlcInfo.PI.WriteLen)
                 {
                     //在读一次
-                    OnErr?.Invoke($"{PlcInfo.Name}PLC公共区读取长度[{operateResult02.Content.Length}]与定义[{PlcInfo.PI.WriteLen}]的不一致");
+                    await OnErr?.Invoke($"{PlcInfo.Name}PLC公共区读取长度[{operateResult02.Content.Length}]与定义[{PlcInfo.PI.WriteLen}]的不一致");
                     continue;
                 }
                 //解析byte[]到指定特性对象种
                 PlcInfo.PI.ObjW.ReadTree(operateResult02.Content);
             }
             //公共区回调
-            OnPublicCallback?.Invoke(PlcInfo.PI);
+            await OnPublicCallback?.Invoke(PlcInfo);
             
             //公共区写
             if(_writePi != null)
@@ -177,7 +188,7 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
                 var result = _plc.Write(_writePi.WriteAddr, buffs);
                 if (!result.IsSuccess)
                 {
-                    OnInfo?.Invoke($"{PlcInfo.Name}公共区写入PLC失败");
+                    await OnInfo?.Invoke($"{PlcInfo.Name}公共区写入PLC失败");
                 }
             }
 
@@ -210,14 +221,14 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
                             var opW = _plc.Read(PlcInfo.EIs[i].WriteAddr, PlcInfo.EIs[i].WriteLen);
                             if (!opW.IsSuccess)
                             {
-                                OnErr?.Invoke($"{PlcInfo.EIs[i].Idx}事件读取PLC->PC失败：{opW.Message}");
+                                await OnErr?.Invoke($"{PlcInfo.EIs[i].Idx}事件读取PLC->PC失败：{opW.Message}");
                                 continue;
                             }
                             PlcInfo.EIs[i].ObjW.ReadTree(opW.Content);
                             var sequenceIdw = PlcInfo.EIs[i].ObjW.GetResourceWithSequenceID();
                             if (sequenceIdw == null)
                             {
-                                OnErr.Invoke($"事件{PlcInfo.EIs[i].WriteClassName}配置中缺少【SequenceID】");
+                                await OnErr.Invoke($"事件{PlcInfo.EIs[i].WriteClassName}配置中缺少【SequenceID】");
                                 continue;
                             }
                             PlcInfo.EIs[i].SequenceIDW = sequenceIdw.Value;
@@ -234,7 +245,7 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
                         //判断长度是否与定义的一致
                         if (opR.Content.Length != PlcInfo.EIs[i].ReadLen)
                         {
-                            OnErr?.Invoke($"{PlcInfo.Name}PLC事件读取区读取长度[{opR.Content.Length}]与定义[{PlcInfo.EIs[i].ReadLen}]的不一致");
+                            await OnErr?.Invoke($"{PlcInfo.Name}PLC事件读取区读取长度[{opR.Content.Length}]与定义[{PlcInfo.EIs[i].ReadLen}]的不一致");
                             continue;
                         }
 
@@ -243,7 +254,7 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
                         var sequenceIdr = PlcInfo.EIs[i].ObjW.GetResourceWithSequenceID();
                         if (sequenceIdr == null)
                         {
-                            OnErr.Invoke($"事件{PlcInfo.EIs[i].ReadClassName}配置中缺少【SequenceID】");
+                            await OnErr?.Invoke($"事件{PlcInfo.EIs[i].ReadClassName}配置中缺少【SequenceID】");
                             continue;
                         }
                         PlcInfo.EIs[i].SequenceIDR = sequenceIdr.Value;
@@ -252,11 +263,11 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
                         {
                             PlcInfo.EIs[i].TriggerCompleted = true;
                             //回调事件处理
-                            OnEventCallback?.Invoke(PlcInfo.Name, PlcInfo.EIs[i]);
+                            await OnEventCallback?.Invoke(PlcInfo, i);
                         }
                         else
                         {
-                            OnInfo?.Invoke($"{PlcInfo.EIs[i].Idx}事件SequnenceID相等：SequnenceID = {PlcInfo.EIs[i].SequenceIDR}");
+                            await OnInfo?.Invoke($"{PlcInfo.EIs[i].Idx}事件SequnenceID相等：SequnenceID = {PlcInfo.EIs[i].SequenceIDR}");
 
                             //该情况可以考虑再次事件写回PLC
                             WirteToPLC2(PlcInfo.EIs[i]);
@@ -265,7 +276,7 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
                     else
                     {
                         //已经有线程处理当前事件 当前事件正在处理中
-                        OnInfo?.Invoke($"{PlcInfo.EIs[i].Idx}当前事件正在处理中");
+                        await OnInfo?.Invoke($"{PlcInfo.EIs[i].Idx}当前事件正在处理中");
                     }
                 }
             }

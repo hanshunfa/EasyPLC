@@ -81,7 +81,7 @@ public class GenBasicService : IGenbasicService
             int nIndentSpaces = 0;
             string strIs = "";
             builder.AppendLine("/// <summary>");
-            builder.AppendLine("///" + structResource.Title);
+            builder.AppendLine("///" + " " + structResource.Title);
             builder.AppendLine("/// <summary>");
             builder.AppendLine("public class " + structResource.Code);
             builder.AppendLine("{");
@@ -99,7 +99,7 @@ public class GenBasicService : IGenbasicService
                         //1bool->1字节
                         builder.AppendLine($"{strIs}[KstopaStructProperty(1)]");//特性
                         builder.AppendLine(strIs + "/// <summary>");
-                        builder.AppendLine(strIs + "///" + childResource.Title);
+                        builder.AppendLine(strIs + "///" + " "+ childResource.Title);
                         builder.AppendLine(strIs + "/// <summary>");
                         builder.AppendLine($"{strIs}public bool {childResource.Code} " + "{get; set; }");
                     }
@@ -107,7 +107,7 @@ public class GenBasicService : IGenbasicService
                     {
                         builder.AppendLine($"{strIs}[KstopaStructProperty(2)]");//特性
                         builder.AppendLine(strIs + "/// <summary>");
-                        builder.AppendLine(strIs + "///" + childResource.Title);
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
                         builder.AppendLine(strIs + "/// <summary>");
                         builder.AppendLine($"{strIs}public short {childResource.Code} " + "{get; set; }");
                     }
@@ -115,7 +115,7 @@ public class GenBasicService : IGenbasicService
                     {
                         builder.AppendLine($"{strIs}[KstopaStructProperty(4)]");//特性
                         builder.AppendLine(strIs + "/// <summary>");
-                        builder.AppendLine(strIs + "///" + childResource.Title);
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
                         builder.AppendLine(strIs + "/// <summary>");
                         builder.AppendLine($"{strIs}public int {childResource.Code} " + "{get; set; }");
                     }
@@ -123,7 +123,7 @@ public class GenBasicService : IGenbasicService
                     {
                         builder.AppendLine($"{strIs}[KstopaStructProperty(4)]");//特性
                         builder.AppendLine(strIs + "/// <summary>");
-                        builder.AppendLine(strIs + "///" + childResource.Title);
+                        builder.AppendLine(strIs + "///"+ " " + childResource.Title);
                         builder.AppendLine(strIs + "/// <summary>");
                         builder.AppendLine($"{strIs}public float {childResource.Code} " + "{get; set; }");
                     }
@@ -131,7 +131,7 @@ public class GenBasicService : IGenbasicService
                     {
                         builder.AppendLine($"{strIs}[KstopaStructProperty({childResource.ValueLength + 2})]");//特性
                         builder.AppendLine(strIs + "/// <summary>");
-                        builder.AppendLine(strIs + "///" + childResource.Title);
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
                         builder.AppendLine(strIs + "/// <summary>");
                         builder.AppendLine($"{strIs}public string {childResource.Code} " + "{get; set; }");
                     }
@@ -139,7 +139,7 @@ public class GenBasicService : IGenbasicService
                     {
                         builder.AppendLine($"{strIs}[KstopaStructProperty({childResource.ValueLength * 2 + 4}, \"UNICODE\")]");//特性
                         builder.AppendLine(strIs + "/// <summary>");
-                        builder.AppendLine(strIs + "///" + childResource.Title);
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
                         builder.AppendLine(strIs + "/// <summary>");
                         builder.AppendLine($"{strIs}public string {childResource.Code} " + "{get; set; }");
                     }
@@ -159,7 +159,7 @@ public class GenBasicService : IGenbasicService
                             int nL = childResource.ValueLength / 8 + (childResource.ValueLength % 8 > 0 ? 1 : 0);
                             builder.AppendLine($"{strIs}[KstopaStructProperty({nL})]");//特性
                             builder.AppendLine(strIs + "/// <summary>");
-                            builder.AppendLine(strIs + "///" + childResource.Title);
+                            builder.AppendLine(strIs + "///" + " " + childResource.Title);
                             builder.AppendLine(strIs + "/// <summary>");
                             builder.AppendLine($"{strIs}public bool[] {childResource.Code} " + "{get; set; }");
                         }
@@ -168,7 +168,7 @@ public class GenBasicService : IGenbasicService
                             int nL = childResource.ValueLength * 2;
                             builder.AppendLine($"{strIs}[KstopaStructProperty({nL})]");//特性
                             builder.AppendLine(strIs + "/// <summary>");
-                            builder.AppendLine(strIs + "///" + childResource.Title);
+                            builder.AppendLine(strIs + "///" + " " + childResource.Title);
                             builder.AppendLine(strIs + "/// <summary>");
                             builder.AppendLine($"{strIs}public short[] {childResource.Code} " + "{get; set; }");
                         }
@@ -177,7 +177,7 @@ public class GenBasicService : IGenbasicService
                             int nL = childResource.ValueLength * 4;
                             builder.AppendLine($"{strIs}[KstopaStructProperty({nL})]");//特性
                             builder.AppendLine(strIs + "/// <summary>");
-                            builder.AppendLine(strIs + "///" + childResource.Title);
+                            builder.AppendLine(strIs + "///" + " " + childResource.Title);
                             builder.AppendLine(strIs + "/// <summary>");
                             builder.AppendLine($"{strIs}public int[] {childResource.Code} " + "{get; set; }");
                         }
@@ -187,7 +187,7 @@ public class GenBasicService : IGenbasicService
                             int nL = childResource.ValueLength * 4;
                             builder.AppendLine($"{strIs}[KstopaStructProperty({nL})]");//特性
                             builder.AppendLine(strIs + "/// <summary>");
-                            builder.AppendLine(strIs + "///" + childResource.Title);
+                            builder.AppendLine(strIs + "///" + " " + childResource.Title);
                             builder.AppendLine(strIs + "/// <summary>");
                             builder.AppendLine($"{strIs}public float[] {childResource.Code} " + "{get; set; }");
                         }
@@ -197,7 +197,7 @@ public class GenBasicService : IGenbasicService
                         int nL = childResource.ValueLength;
                         builder.AppendLine($"{strIs}[KstopaStruct({nL})]");//特性
                         builder.AppendLine(strIs + "/// <summary>");
-                        builder.AppendLine(strIs + "///" + childResource.Title);
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
                         builder.AppendLine(strIs + "/// <summary>");
                         builder.AppendLine($"{strIs}public {ac.Code}[] {childResource.Code}" + "{get; set; }");
                     }
@@ -207,13 +207,171 @@ public class GenBasicService : IGenbasicService
                     int nL = 1;
                     builder.AppendLine($"{strIs}[KstopaStruct({nL})]");//特性
                     builder.AppendLine(strIs + "/// <summary>");
-                    builder.AppendLine(strIs + "///" + childResource.Title);
+                    builder.AppendLine(strIs + "///" + " " + childResource.Title);
                     builder.AppendLine(strIs + "/// <summary>");
                     builder.AppendLine($"{strIs}public {childResource.Code} {childResource.Code}" + "{get; set; }");
                 }
             }
             builder.AppendLine("}");
         }
+        return builder.ToString();
+    }
+
+    public async Task<string> ExecGenClassPro()
+    {
+        // 动态生成文件内容
+        var resourceList = await _plcResourceService.GetListAsync();
+        var codes = new List<string>();
+        var structIds = new HashSet<long>();//结构对象Ids
+        foreach (var resource in from resource in resourceList 
+                 where resource.Category == "STRUCTDATA" 
+                 where !resource.Code.Contains('[') 
+                 where !codes.Contains(resource.Code) 
+                 select resource
+                 )
+        {
+            codes.Add(resource.Code);
+            structIds.Add(resource.Id);
+        }
+        return await CreateGenClassCode(structIds);
+    }
+
+    /// <summary>
+    /// 根据PLC结构定义创建类对象
+    /// </summary>
+    /// <param name="structIds"></param>
+    /// <returns></returns>
+    private async Task<string> CreateGenClassCode(HashSet<long> structIds)
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.AppendLine("namespace EasyPlc.Plc");
+        builder.AppendLine("{");
+        builder.AppendLine();
+        foreach (var structId in structIds)
+        {
+            var structResource = await _plcResourceService.GetResurceById(structId);
+            int nIndentSpaces = 0;
+            string strStartIs = "";
+            nIndentSpaces += 4;
+            strStartIs = GetIndentSpaces(nIndentSpaces);
+            builder.AppendLine(strStartIs + "/// <summary>");
+            builder.AppendLine(strStartIs + "///" + " " + structResource.Title);
+            builder.AppendLine(strStartIs + "/// <summary>");
+            builder.AppendLine(strStartIs + "public class " + structResource.Code);
+            builder.AppendLine(strStartIs + "{");
+
+            nIndentSpaces += 4;
+            string strIs = "";
+            strIs = GetIndentSpaces(nIndentSpaces);
+            //类里面的
+            var childResources = await _plcResourceService.GetChildListById(structId, false, false);
+            foreach (var childResource in childResources)
+            {
+                if (childResource.Category == "BASEDATA")
+                {
+                    //基础类型
+                    if (childResource.ValueType == "Bool")
+                    {
+                        //1bool->1字节
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine($"{strIs}public bool {childResource.Code} " + "{get; set; }");
+                    }
+                    if (childResource.ValueType == "Bool[]")
+                    {
+                        //1bool->1字节
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine($"{strIs}public bool[] {childResource.Code} " + "{get; set; }");
+                    }
+                    if (childResource.ValueType == "Int16")
+                    {
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine($"{strIs}public short {childResource.Code} " + "{get; set; }");
+                    }
+                    if (childResource.ValueType == "Int16[]")
+                    {
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine($"{strIs}public short[] {childResource.Code} " + "{get; set; }");
+                    }
+                    if (childResource.ValueType == "Int32")
+                    {
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine($"{strIs}public int {childResource.Code} " + "{get; set; }");
+                    }
+                    if (childResource.ValueType == "Int32[]")
+                    {
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine($"{strIs}public int[] {childResource.Code} " + "{get; set; }");
+                    }
+                    if (childResource.ValueType == "Float")
+                    {
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine($"{strIs}public float {childResource.Code} " + "{get; set; }");
+                    }
+                    if (childResource.ValueType == "Float[]")
+                    {
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine($"{strIs}public float[] {childResource.Code} " + "{get; set; }");
+                    }
+                    if (childResource.ValueType == "String")
+                    {
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine($"{strIs}public string {childResource.Code} " + "{get; set; }");
+                    }
+                    if (childResource.ValueType == "WString")
+                    {
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine($"{strIs}public string {childResource.Code} " + "{get; set; }");
+                    }
+                }
+                if (childResource.Category == "ARRDATA")
+                {
+                    //查看数组里面的对象
+                    var arrChilds = await _plcResourceService.GetChildListById(childResource.Id, false, false);
+                    if (arrChilds.Count == 0) throw Oops.Bah($"数组里没有对象");
+                    var ac = arrChilds[0];//当前只支持结构数据，故获取第一个则是结构信息
+
+                    if (ac.Category == "STRUCTDATA")
+                    {
+                        builder.AppendLine(strIs + "/// <summary>");
+                        builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                        builder.AppendLine(strIs + "/// <summary>");
+                        //去掉[x]
+                        var idxs = ac.Code.IndexOf('[');
+                        var codeName = ac.Code.Substring(0, idxs);
+                        builder.AppendLine($"{strIs}public {codeName}[] {childResource.Code}" + "{get; set; }");
+                    }
+                }
+                if (childResource.Category == "STRUCTDATA")
+                {
+                    builder.AppendLine(strIs + "/// <summary>");
+                    builder.AppendLine(strIs + "///" + " " + childResource.Title);
+                    builder.AppendLine(strIs + "/// <summary>");
+                    builder.AppendLine($"{strIs}public {childResource.Code} {childResource.Code}" + "{get; set; }");
+                }
+            }
+            builder.AppendLine(strStartIs + "}");
+        }
+        builder.AppendLine("}");
         return builder.ToString();
     }
 
@@ -246,7 +404,7 @@ public class GenBasicService : IGenbasicService
         builder.AppendLine("namespace EasyPlc.Plugin.Plc;");
         builder.AppendLine();
         builder.AppendLine("/// <summary>");
-        builder.AppendLine("///" + "SiemensPLC信息设定工具类");
+        builder.AppendLine("///" + " " + "SiemensPLC信息设定工具类");
         builder.AppendLine("/// <summary>");
         builder.AppendLine("public class SiemensPLCInfoUtil : IGenSiemensPlcInfoUtil");
         builder.AppendLine("{");
@@ -255,7 +413,7 @@ public class GenBasicService : IGenbasicService
 
         //添加静态方法
         builder.AppendLine(strIs_1 + "/// <summary>");
-        builder.AppendLine(strIs_1 + "///" + "SiemensPLC获取信息");
+        builder.AppendLine(strIs_1 + "///" + " " + "SiemensPLC获取信息");
         builder.AppendLine(strIs_1 + "/// <summary>");
         builder.AppendLine(strIs_1 + "public PlcInfo[] GetSiemensPLCInfo()");
         builder.AppendLine(strIs_1 + "{");

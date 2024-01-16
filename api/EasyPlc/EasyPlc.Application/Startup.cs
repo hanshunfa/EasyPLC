@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 
+
 namespace EasyPlc.Application;
 
 /// <summary>
@@ -17,6 +18,7 @@ public class Startup : AppStartup
     {
         //业务配置转实体
         services.AddConfigurableOptions<ApplicationSettingsOptions>();
+       
     }
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
@@ -24,5 +26,6 @@ public class Startup : AppStartup
         //通过 App.GetOptions<TOptions> 获取选项
         var settings = App.GetOptions<ApplicationSettingsOptions>();
         CodeFirstUtils.CodeFirst(settings, fullName);//CodeFirst
+
     }
 }

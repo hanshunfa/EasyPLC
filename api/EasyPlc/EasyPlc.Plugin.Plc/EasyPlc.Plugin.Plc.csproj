@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EasyPlc.Application\EasyPlc.Application.csproj" />
+    <ProjectReference Include="..\EasyPlc.Plugin.RabbitMQ\EasyPlc.Plugin.RabbitMQ.csproj" />
   </ItemGroup>
 
 </Project>
