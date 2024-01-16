@@ -11,7 +11,7 @@
 * 创建者：韩顺发
 * CLR版本：4.0.30319.42000
 * 电子邮箱：shunfa.han@kstopa.com.cn
-* 创建时间：2023/11/22 10:24:22
+* 创建时间：2023/12/11 10:35:50
 * 版本：v1.0.0
 * 描述：
 *
@@ -24,24 +24,11 @@
 ===============================================================================================*/
 
 
-namespace EasyPlc.Plugin.Plc.Utils;
+using EasyPlc.SqlSugar;
 
-/// <summary>
-/// 粘土对象生成工具
-/// </summary>
-public static class GenClayUtil
+namespace EasyPlc.Plugin.RabbitMQ;
+
+public class RabbitMqInfoInput : RabbitMqaLog
 {
-    public static dynamic GenClay(List<PlcResource> resources)
-    {
-        // 创建一个空的粘土对象
-        dynamic clay = new Clay();
-
-        clay.A = resources[0];
-        clay.B = 100f;
-        clay.C = (short)10;
-        clay.D = 10;
-        clay.E = (float)10;
-
-        return clay.Solidify<dynamic>();
-    }
+    
 }

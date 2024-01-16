@@ -1,0 +1,10 @@
+{
+  //mqtt设置
+  "RabbitMQSetting": {
+    "Host": "127.0.0.1",
+    "Port": 5672,
+    "User": "shunfa",
+    "Password": "123",
+    "Timeout": 5000
+  }
+}

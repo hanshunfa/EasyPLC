@@ -1,0 +1,17 @@
+{
+  //rabbitMQ设置
+  "RabbitMQSetting": {
+    "Host": "127.0.0.1",
+    "Port": 5672,
+    "User": "easyplc",
+    "Password": "123",
+    "Timeout": 5000
+  }
+  //"RabbitMQSettings": {
+  //  "Host": "192.168.115.45",
+  //  "Port": 5672,
+  //  "User": "kstopa",
+  //  "Password": "kstopa",
+  //  "Timeout": 5000
+  //}
+}

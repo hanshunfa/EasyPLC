@@ -19,4 +19,9 @@ public interface IGenbasicService : ITransient
     /// <returns></returns>
     Task ExecGenSiemensPlcInfoPro();
 
+    /// <summary>
+    /// 生成结构对象类
+    /// </summary>
+    /// <returns></returns>
+    Task<string> ExecGenClassPro();
 }

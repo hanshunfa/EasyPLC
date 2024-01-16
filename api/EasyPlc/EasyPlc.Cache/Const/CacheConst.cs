@@ -179,4 +179,5 @@ public class CacheConst
     /// 加工数据缓存Key
     /// </summary>
     public const string Cache_ProDataTmp = Cache_Prefix_Web + "ProDataTmp";
+    public const string Cache_RabbitMq = Cache_Prefix_Web + "RabbitMq";
 }

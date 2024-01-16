@@ -94,35 +94,35 @@ public class Base_EapToPlc_IN
 /// <summary>
 public class Base_EapToPlc_OUT
 {
+    /// <summary>
+    /// SequenceID
+    /// </summary>
     [KstopaStructProperty(2)]
-    /// <summary>
-    ///SequenceID
-    /// <summary>
     public short SequenceID {get; set; }
+    /// <summary>
+    /// ACK
+    /// </summary>
     [KstopaStructProperty(2)]
-    /// <summary>
-    ///ACK
-    /// <summary>
     public short ACK {get; set; }
+    /// <summary>
+    /// 反馈信息
+    /// </summary>
     [KstopaStructProperty(64, "UNICODE")]
-    /// <summary>
-    ///反馈信息
-    /// <summary>
     public string Msg {get; set; }
+    /// <summary>
+    /// 编码
+    /// </summary>
     [KstopaStructProperty(2)]
-    /// <summary>
-    ///编码
-    /// <summary>
     public short ResultCode {get; set; }
+    /// <summary>
+    /// 载具编码
+    /// </summary>
     [KstopaStructProperty(42)]
-    /// <summary>
-    ///载具编码
-    /// <summary>
     public string CarrierSN {get; set; }
 }
 /// <summary>
-///Base_PlcToEap_OUT
-/// <summary>
+/// Base_PlcToEap_OUT
+/// </summary>
 public class Base_PlcToEap_OUT
 {
     [KstopaStructProperty(2)]

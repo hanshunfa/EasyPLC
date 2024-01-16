@@ -1,4 +1,10 @@
-﻿namespace EasyPlc.Plugin.Plc;
+﻿using EasyPlc.Plugin.Plc.Utils;
+using EasyPlc.Plugin.RabbitMQ;
+using EasyRabbitMQ;
+using Microsoft.CSharp;
+using System.CodeDom.Compiler;
+
+namespace EasyPlc.Plugin.Plc;
 
 /// <summary>
 /// 西门子PLC工厂
@@ -6,13 +12,70 @@
 public class SiemensPlcFactoryService : ISiemensPlcFactoryService
 {
     private readonly IGenSiemensPlcInfoUtil _genSiemensPlcInfoUtil;
+    private readonly IRabbitMQManagemerntService _rabbitMQManagementService;
 
     public SiemensPlcFactoryService(
-        IGenSiemensPlcInfoUtil genSiemensPlcInfoUtil
+        IGenSiemensPlcInfoUtil genSiemensPlcInfoUtil,
+        IRabbitMQManagemerntService rabbitMQManagementService
         )
     {
         _genSiemensPlcInfoUtil = genSiemensPlcInfoUtil;
+        _rabbitMQManagementService = rabbitMQManagementService;
     }
+
+    #region 回调监听，全部都是同步的，里面不能有阻塞操作
+    private async Task OnErr(string errMsg)
+    {
+        
+    }
+    private async Task OnInfo(string Info)
+    {
+
+    }
+    /// <summary>
+    /// 公共区读取内容
+    /// </summary>
+    /// <param name="plc"></param>
+    private async Task OnPublic(SiemensPlcInfo plc)
+    {
+        string body = string.Empty;
+        body = plc.CreateRealtimeDataJsonString();
+        await _rabbitMQManagementService.PublishRealtimeData(new RabbitMqInfoInput
+        {
+            Id = CommonUtils.GetSingleId(),
+            Name = plc.Name,
+            Ip = plc.IP,
+            Version = plc.Version,
+            ReadTime = plc.PI.ReadTime,
+            SendTime = plc.PI.SendTime,
+            ReadBody = body,
+            Status = EventStatus.Ready
+        });
+    }
+    /// <summary>
+    /// 事件区读取内容
+    /// </summary>
+    /// <param name="plc"></param>
+    /// <param name="eventIdx"></param>
+    private async Task OnEvent(SiemensPlcInfo plc, int eventIdx)
+    {
+        //提取PLC事件信息
+        var body = plc.CreateEventDataJsonString(eventIdx);
+        await _rabbitMQManagementService.PublishRealtimeEvent(new RabbitMqInfoInput
+        {
+            Id = CommonUtils.GetSingleId(),
+            Name = plc.Name,
+            Ip = plc.IP,
+            Version = plc.Version,
+            ReadTime = plc.EIs[eventIdx].ReadTime,
+            SendTime = plc.EIs[eventIdx].SendTime,
+            ReadBody = body,
+            Status = EventStatus.Ready
+        });
+    }
+
+    #endregion
+
     private bool IsUse { get; set; } = false;
     public void Use()
     {
@@ -26,15 +89,20 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
     {
         if (!IsUse) return "工厂不能使用，请联系管理员";
         if (ListConnectionSiemensPLC.Count > 0) return "工厂已存在";
-        //根据动态生成的PLC信息，若返回NULL，表示PLC还没有动态生成
-        var plcInfos =await _genSiemensPlcInfoUtil.GenSiemensPLCInfoList();
-        if (plcInfos == null) return "请通过代码生成器生成代码，重新编译测试";
+        var plcInfos = await _genSiemensPlcInfoUtil.GenSiemensPLCInfoList();
+        if (plcInfos == null && plcInfos.Count == 0) return "没有配置的PLC";
         //创建实例
         foreach ( var plcInfo in plcInfos )
         {
             var connectionSiemensPLC = new ConnectionSiemensPLC();
             connectionSiemensPLC.SetPlcInfo(plcInfo);
             ListConnectionSiemensPLC.Add(connectionSiemensPLC);
+
+            //监听回调
+            connectionSiemensPLC.OnErr += OnErr;
+            connectionSiemensPLC.OnInfo += OnInfo;
+            connectionSiemensPLC.OnPublicCallback += OnPublic;
+            connectionSiemensPLC.OnEventCallback += OnEvent;
         }
 
         return "成功";
@@ -47,6 +115,13 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
     {
         if (!IsUse) return "工厂不能使用，请联系管理员";
         if (ListConnectionSiemensPLC.Count == 0) return "工厂不存在";
+        //取消监听
+        ListConnectionSiemensPLC.ForEach(connPlc => {
+            connPlc.OnErr -= OnErr;
+            connPlc.OnInfo -= OnInfo;
+            connPlc.OnPublicCallback -= OnPublic;
+            connPlc.OnEventCallback -= OnEvent;
+        });
         //关闭所有PLC
         StopPLC();
         ListConnectionSiemensPLC.Clear();
@@ -96,4 +171,5 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
     {
         return ListConnectionSiemensPLC;
     }
+
 }

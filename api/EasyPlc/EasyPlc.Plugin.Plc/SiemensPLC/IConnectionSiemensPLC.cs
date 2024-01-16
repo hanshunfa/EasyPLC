@@ -20,4 +20,16 @@ public interface IConnectionSiemensPLC : ITransient
     /// </summary>
     /// <returns></returns>
     string StopWork();
+    /// <summary>
+    /// 设置写公共区内容
+    /// </summary>
+    /// <param name="publicInfo"></param>
+    /// <returns></returns>
+    bool SetWritePi(PublicInfo publicInfo);
+    /// <summary>
+    /// 设置写事件区内容
+    /// </summary>
+    /// <param name="ei"></param>
+    /// <returns></returns>
+    bool SetEventInfo(EventInfo ei);
 }
