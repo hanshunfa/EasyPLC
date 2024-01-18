@@ -75,7 +75,7 @@ public class RabbitMQManagemerntService : IRabbitMQManagemerntService
         bool rlt = true;
         try
         {
-            _rabbitMQManager.PublishEvent(input.ReadBody);
+            _rabbitMQManager.PublishEvent(input.ToJson());
             await _rabbitMqMonitoringService.Add(input.Adapt<RabbitMonitoringAddInput>());//新增记录到内存中
         }
         catch { }

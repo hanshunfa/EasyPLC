@@ -38,8 +38,8 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
     /// <param name="plc"></param>
     private async Task OnPublic(SiemensPlcInfo plc)
     {
-        string body = string.Empty;
-        body = plc.CreateRealtimeDataJsonString();
+        var readBody = plc.CreateRealtimeDataJsonString();
+        var writeBody = plc.CreateRealtimeDataJsonString(CreateJsonStringUtil.EnumBody.WriteBody);
         await _rabbitMQManagementService.PublishRealtimeData(new RabbitMqInfoInput
         {
             Id = CommonUtils.GetSingleId(),
@@ -48,7 +48,8 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
             Version = plc.Version,
             ReadTime = plc.PI.ReadTime,
             SendTime = plc.PI.SendTime,
-            ReadBody = body,
+            ReadBody = readBody,
+            WriteBody = writeBody,
             Status = EventStatus.Ready
         });
     }
@@ -60,18 +61,21 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
     private async Task OnEvent(SiemensPlcInfo plc, int eventIdx)
     {
         //提取PLC事件信息
-        var body = plc.CreateEventDataJsonString(eventIdx);
-        await _rabbitMQManagementService.PublishRealtimeEvent(new RabbitMqInfoInput
-        {
-            Id = CommonUtils.GetSingleId(),
-            Name = plc.Name,
-            Ip = plc.IP,
-            Version = plc.Version,
-            ReadTime = plc.EIs[eventIdx].ReadTime,
-            SendTime = plc.EIs[eventIdx].SendTime,
-            ReadBody = body,
-            Status = EventStatus.Ready
-        });
+        var readBody = plc.CreateEventDataJsonString(eventIdx, CreateJsonStringUtil.EnumBody.ReadBody);
+        var writeBody = plc.CreateEventDataJsonString(eventIdx, CreateJsonStringUtil.EnumBody.WriteBody);
+        await _rabbitMQManagementService.PublishRealtimeEvent(
+            new RabbitMqInfoInput
+            {
+                Id = CommonUtils.GetSingleId(),
+                Name = plc.Name,
+                Ip = plc.IP,
+                Version = plc.Version,
+                ReadTime = plc.EIs[eventIdx].ReadTime,
+                SendTime = plc.EIs[eventIdx].SendTime,
+                ReadBody = readBody,
+                WriteBody = writeBody,
+                Status = EventStatus.Ready
+            });
     }
 
     #endregion
@@ -90,19 +94,19 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
         if (!IsUse) return "工厂不能使用，请联系管理员";
         if (ListConnectionSiemensPLC.Count > 0) return "工厂已存在";
         var plcInfos = await _genSiemensPlcInfoUtil.GenSiemensPLCInfoList();
-        if (plcInfos == null && plcInfos.Count == 0) return "没有配置的PLC";
+        if (plcInfos == null || plcInfos.Count == 0) return "没有配置的PLC";
         //创建实例
         foreach ( var plcInfo in plcInfos )
         {
-            var connectionSiemensPLC = new ConnectionSiemensPLC();
-            connectionSiemensPLC.SetPlcInfo(plcInfo);
-            ListConnectionSiemensPLC.Add(connectionSiemensPLC);
+            var connectionSiemensPlc = new ConnectionSiemensPLC();
+            connectionSiemensPlc.SetPlcInfo(plcInfo);
+            ListConnectionSiemensPLC.Add(connectionSiemensPlc);
 
             //监听回调
-            connectionSiemensPLC.OnErr += OnErr;
-            connectionSiemensPLC.OnInfo += OnInfo;
-            connectionSiemensPLC.OnPublicCallback += OnPublic;
-            connectionSiemensPLC.OnEventCallback += OnEvent;
+            connectionSiemensPlc.OnErr += OnErr;
+            connectionSiemensPlc.OnInfo += OnInfo;
+            connectionSiemensPlc.OnPublicCallback += OnPublic;
+            connectionSiemensPlc.OnEventCallback += OnEvent;
         }
 
         return "成功";

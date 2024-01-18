@@ -37,7 +37,7 @@ public static class CreateJsonStringUtil
     /// </summary>
     /// <param name="plc"></param>
     /// <returns></returns>
-    public static string CreateRealtimeDataJsonString(this SiemensPlcInfo plc)
+    public static string CreateRealtimeDataJsonString(this SiemensPlcInfo plc, EnumBody enumBody = EnumBody.ReadBody)
     {
         StringBuilder builder = new StringBuilder();
 
@@ -69,7 +69,9 @@ public static class CreateJsonStringUtil
         ////公共区读内容
         //nIS -= 4;
         var strIs_4 = GetIndentSpaces(nIS);
-        builder.AppendLine(plc.PI.ObjR.CreateJson4TreeList(strIs_4));
+        builder.AppendLine(
+            enumBody == EnumBody.ReadBody ? plc.PI.ObjR.CreateJson4TreeList(strIs_4) : plc.PI.ObjW.CreateJson4TreeList(strIs_4)
+            );
 
         //}
         builder.AppendLine(strIs_1 + "}");
@@ -81,7 +83,7 @@ public static class CreateJsonStringUtil
     /// </summary>
     /// <param name="plc"></param>
     /// <returns></returns>
-    public static string CreateEventDataJsonString(this SiemensPlcInfo plc, int eventIdx)
+    public static string CreateEventDataJsonString(this SiemensPlcInfo plc, int eventIdx, EnumBody enumBody = EnumBody.ReadBody)
     {
         StringBuilder builder = new StringBuilder();
 
@@ -113,7 +115,8 @@ public static class CreateJsonStringUtil
         ////事件区读内容
         //nIS -= 4;
         var strIs_4 = GetIndentSpaces(nIS);
-        builder.AppendLine(plc.EIs[eventIdx].ObjR.CreateJson4TreeList(strIs_4));
+        builder.AppendLine(
+            enumBody == EnumBody.ReadBody ? plc.EIs[eventIdx].ObjR.CreateJson4TreeList(strIs_4) : plc.EIs[eventIdx].ObjW.CreateJson4TreeList(strIs_4));
 
         //}
         builder.AppendLine(strIs_1 + "}");
@@ -207,5 +210,10 @@ public static class CreateJsonStringUtil
             
         });
         return builder.ToString();
+    }
+    public enum EnumBody
+    {
+        ReadBody = 1,
+        WriteBody
     }
 }
