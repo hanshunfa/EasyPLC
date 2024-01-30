@@ -1,5 +1,5 @@
 ﻿/*=============================================================================================
-* 
+*
 *      *******    *******         **    **
 *      **         **              **    **
 *      **         **              **    **
@@ -20,7 +20,7 @@
 * 修改时间：
 * 修改说明：
 * 版本：
-* 
+*
 ===============================================================================================*/
 
 namespace EasyPlc.Plugin.Plc;
@@ -30,20 +30,23 @@ namespace EasyPlc.Plugin.Plc;
 /// </summary>
 public class EventInfo
 {
+    /// <summary>
+    /// 事件索引
+    /// </summary>
     public int Idx { get; set; }
-    public string ReadAddr { get; set; }
-    public ushort ReadLen { get; set; }
-    public string ReadClassName { get; set; }
-    public bool IsReset { get; set; } = true;
-    public string WriteAddr { get; set; }
-    public ushort WriteLen { get; set; }
-    public string WriteClassName { get; set; }
-    public byte[] WriteBuffer { get; set; }
+
+    /// <summary>
+    /// 事件完成标志
+    /// </summary>
     public bool TriggerCompleted { get; set; }
-    public int SequenceIDR { get; set; } = -1;
-    public int SequenceIDW { get; set; } = -1;
-    public List<PlcResource> ObjR { get; set; }
-    public List<PlcResource> ObjW { get; set; }
-    public DateTime ReadTime { get; set; }
-    public DateTime SendTime { get; set; }
+
+    /// <summary>
+    /// 事件读信息类
+    /// </summary>
+    public EventReadInfo ReadInfo { get; set; } = new();
+
+    /// <summary>
+    /// 事件写信息类
+    /// </summary>
+    public EventWriterInfo WriteInfo { get; set; } = new();
 }

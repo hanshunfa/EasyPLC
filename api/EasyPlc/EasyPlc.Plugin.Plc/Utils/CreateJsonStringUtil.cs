@@ -1,5 +1,5 @@
 ﻿/*=============================================================================================
-* 
+*
 *      *******    *******         **    **
 *      **         **              **    **
 *      **         **              **    **
@@ -20,10 +20,8 @@
 * 修改时间：
 * 修改说明：
 * 版本：
-* 
+*
 ===============================================================================================*/
-
-
 
 namespace EasyPlc.Plugin.Plc.Utils;
 
@@ -70,7 +68,7 @@ public static class CreateJsonStringUtil
         //nIS -= 4;
         var strIs_4 = GetIndentSpaces(nIS);
         builder.AppendLine(
-            enumBody == EnumBody.ReadBody ? plc.PI.ObjR.CreateJson4TreeList(strIs_4) : plc.PI.ObjW.CreateJson4TreeList(strIs_4)
+            enumBody == EnumBody.ReadBody ? plc.PI.ReadInfo.ListPr.CreateJson4TreeList(strIs_4) : plc.PI.WriterInfo.ListPr.CreateJson4TreeList(strIs_4)
             );
 
         //}
@@ -78,6 +76,7 @@ public static class CreateJsonStringUtil
 
         return builder.ToString();
     }
+
     /// <summary>
     /// 根据PLC信息创建事件数据Json
     /// </summary>
@@ -116,14 +115,14 @@ public static class CreateJsonStringUtil
         //nIS -= 4;
         var strIs_4 = GetIndentSpaces(nIS);
         builder.AppendLine(
-            enumBody == EnumBody.ReadBody ? plc.EIs[eventIdx].ObjR.CreateJson4TreeList(strIs_4) : plc.EIs[eventIdx].ObjW.CreateJson4TreeList(strIs_4));
+            enumBody == EnumBody.ReadBody ? plc.EIs[eventIdx].ReadInfo.ListPr.CreateJson4TreeList(strIs_4) : plc.EIs[eventIdx].WriteInfo.ListPr.CreateJson4TreeList(strIs_4));
 
         //}
         builder.AppendLine(strIs_1 + "}");
 
-        
         return builder.ToString();
     }
+
     private static string GetIndentSpaces(int num)
     {
         if (num <= 0)
@@ -138,15 +137,17 @@ public static class CreateJsonStringUtil
             return str;
         }
     }
+
     private static string CreateJson4TreeList(this List<PlcResource> resources, string space = "")
     {
         StringBuilder builder = new StringBuilder();
-        resources.ForEach(p => {
-            var douhao = resources.LastOrDefault() != p ? ",": "" ;
+        resources.ForEach(p =>
+        {
+            var douhao = resources.LastOrDefault() != p ? "," : "";
             if (p.Category == "STRUCTDATA")
             {
                 //有可能是结构数组内部结构
-                if(p.Code.Contains("[") && p.Code.Contains("]"))
+                if (p.Code.Contains("[") && p.Code.Contains("]"))
                 {
                     builder.AppendLine(space + $"{{");
                 }
@@ -154,13 +155,12 @@ public static class CreateJsonStringUtil
                 {
                     builder.AppendLine(space + $"\"{p.Code}\": {{");
                 }
-                
+
                 if (p.Children.Count > 0)
                 {
                     builder.AppendLine(p.Children.CreateJson4TreeList(space + "    "));
                 }
                 builder.AppendLine(space + $"}}{douhao}");
-                
             }
             else if (p.Category == "ARRDATA")
             {
@@ -171,35 +171,36 @@ public static class CreateJsonStringUtil
                 }
                 builder.AppendLine(space + $"]{douhao}");
             }
-            else if(p.Category == "BASEDATA")
+            else if (p.Category == "BASEDATA")
             {
                 string strValue = string.Empty;
                 switch (p.ValueType)
                 {
                     case "Int16" or "Int32" or "Float":
-                        strValue = p.Value + "" ;
+                        strValue = p.Value + "";
                         break;
+
                     case "Bool[]" or "Int16[]" or "Int32[]" or "Float[]":
-                    {
-                        var arr = p.Value as Array;
-                        string v = string.Empty;
-                        v += "[";
-                        for (int i = 0; i < arr.Length; i++)
                         {
-                            if(i != 0) v += ", ";
-                            if (p.ValueType == "Bool[]")
+                            var arr = p.Value as Array;
+                            string v = string.Empty;
+                            v += "[";
+                            for (int i = 0; i < arr.Length; i++)
                             {
-                                v += arr.GetValue(i)?.ToString()?.ToLower();
+                                if (i != 0) v += ", ";
+                                if (p.ValueType == "Bool[]")
+                                {
+                                    v += arr.GetValue(i)?.ToString()?.ToLower();
+                                }
+                                else
+                                {
+                                    v += arr.GetValue(i);
+                                }
                             }
-                            else
-                            {
-                                v += arr.GetValue(i);
-                            }
+                            v += "]";
+                            strValue = v;
+                            break;
                         }
-                        v += "]";
-                        strValue = v;
-                        break;
-                    }
                     case "String" or "WString":
                         strValue = "\"" + p.Value + "\"";
                         break;
@@ -207,10 +208,10 @@ public static class CreateJsonStringUtil
                 builder.AppendLine(space + $"\"{p.Code}\": {strValue}{douhao}");
             }
             //加添逗号
-            
         });
         return builder.ToString();
     }
+
     public enum EnumBody
     {
         ReadBody = 1,

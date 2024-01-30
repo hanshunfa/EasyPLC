@@ -93,8 +93,12 @@ public abstract class RabbitMqaLog : BaseEntity
     public virtual DateTime SendTime { get; set; }
     [SugarColumn(ColumnDescription = "接收业务端回复时间", IsNullable = true)]
     public virtual DateTime ReceivedTime { get; set; }
+    [SugarColumn(ColumnDescription = "读对象类型", IsIgnore = true)]
+    public virtual Type ReadType { get; set; }
     [SugarColumn(ColumnDescription = "Plc信息", ColumnDataType = StaticConfig.CodeFirst_BigString, IsNullable = true)]
     public virtual string ReadBody { get; set; }
+    [SugarColumn(ColumnDescription = "写对象类型", IsIgnore = true)]
+    public virtual Type WriteType { get; set; }
     [SugarColumn(ColumnDescription = "Eap信息", ColumnDataType = StaticConfig.CodeFirst_BigString, IsNullable = true)]
     public virtual string WriteBody { get; set; }
     [SugarColumn(ColumnDescription = "事件状态")]

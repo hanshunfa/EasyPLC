@@ -1,5 +1,5 @@
 ﻿/*=============================================================================================
-* 
+*
 *      *******    *******         **    **
 *      **         **              **    **
 *      **         **              **    **
@@ -20,10 +20,8 @@
 * 修改时间：
 * 修改说明：
 * 版本：
-* 
+*
 ===============================================================================================*/
-
-
 
 namespace EasyPlc.Plugin.Plc;
 
@@ -32,16 +30,6 @@ namespace EasyPlc.Plugin.Plc;
 /// </summary>
 public class PublicInfo
 {
-    public string ReadAddr { get; set; }
-    public ushort ReadLen { get; set; }
-    public string ReadClassName { get; set; }
-    public bool IsReset { get; set; } = true;
-    public string WriteAddr { get; set; }
-    public ushort WriteLen;
-    public string WriteClassName { get; set; }
-    public List<PlcResource> ObjR { get; set; }
-    public List<PlcResource> ObjW { get; set; }
-
-    public DateTime ReadTime { get; set; }
-    public DateTime SendTime { get; set; }
+    public PublicReadInfo ReadInfo { get; set; } = new();
+    public PublicWriterInfo WriterInfo { get; set; } = new();
 }

@@ -9,6 +9,7 @@ public static class SiemensRefelectionUtil
     {
         return (T)CreateObjectWithType(typeof(T), buffer, ref startIndex, byteTransform);
     }
+
     /// <summary>
     /// 创建对象，根据Type
     /// </summary>
@@ -57,10 +58,8 @@ public static class SiemensRefelectionUtil
             object[] customAttributes1 = pi.GetCustomAttributes(typeof(KstopaStructPropertyAttribute), inherit: false);
             if (customAttributes1.Length > 0)
             {
-
                 KstopaStructPropertyAttribute kstopaStructPropertyAttribute = (KstopaStructPropertyAttribute)customAttributes1[0];
                 int Length = kstopaStructPropertyAttribute.Lenght;
-
 
                 // 1 获取属性类型
                 Type propertyType = pi.PropertyType;
@@ -195,7 +194,6 @@ public static class SiemensRefelectionUtil
                 MethodInfo Generic_Method = Queryable_Method.MakeGenericMethod(generic_type);
 
                 ret_value = Generic_Method.Invoke(null, obj);
-
             }
             catch (Exception ep)
             {
@@ -203,7 +201,6 @@ public static class SiemensRefelectionUtil
                 ret = inner_ep.Message;
                 break;
             }
-
         } while (false);
 
         return ret;
@@ -218,6 +215,7 @@ public static class SiemensRefelectionUtil
         }
         return array_obj;
     }
+
     /// <summary>
     /// 解析对象
     /// </summary>
@@ -231,6 +229,7 @@ public static class SiemensRefelectionUtil
         int idx = 0;
         return CreateObject1<T>(buffer, ref idx, byteTransform);
     }
+
     /// <summary>
     /// 解析对象
     /// </summary>
@@ -244,6 +243,7 @@ public static class SiemensRefelectionUtil
         int idx = 0;
         return CreateObjectWithType(obj_type, buffer, ref idx, byteTransform);
     }
+
     /// <summary>
     /// 获取对象字节长度
     /// </summary>
@@ -255,6 +255,7 @@ public static class SiemensRefelectionUtil
         CreateObjectL<T>(ref objLenght);
         return objLenght;
     }
+
     /// <summary>
     /// 获取对象字节长度
     /// </summary>
@@ -272,7 +273,6 @@ public static class SiemensRefelectionUtil
         object t = null;
         int idx = 0;
 
-
         PropertyInfo[] pis = obj_type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
         t = Activator.CreateInstance(obj_type);
@@ -285,14 +285,12 @@ public static class SiemensRefelectionUtil
                 //类属性
                 if (pi.PropertyType.IsArray)
                 {
-
                     //数组对象
                     //获取特性里面数组个数
                     KstopaStructAttribute kstopaStructAttribute = (KstopaStructAttribute)customAttributes[0];
                     int count = kstopaStructAttribute.Count;
                     object[] ret_obj = new object[2] { count, len };
                     object ret_value = null;
-
 
                     string ret = RefelectionCallStaticMethod(typeof(SiemensRefelectionUtil), "CreateArraryObjectL", ref ret_obj, ref ret_value, pi.PropertyType.GetElementType());
 
@@ -308,7 +306,6 @@ public static class SiemensRefelectionUtil
                     object[] ret_obj = new object[1] { len };
                     object ret_value = null;
 
-
                     RefelectionCallStaticMethod(typeof(SiemensRefelectionUtil), "CreateObjectL", ref ret_obj, ref ret_value, pi.PropertyType.GetTypeInfo());
                     len = (ushort)ret_obj[0];
                     //  pi.SetValue(t, ret_value);
@@ -321,19 +318,17 @@ public static class SiemensRefelectionUtil
                 // 1 获取属性类型
                 Type propertyType = pi.PropertyType;
 
-
                 len += (ushort)kstopaStructPropertyAttribute.Lenght;
                 idx += kstopaStructPropertyAttribute.Lenght;
             }
         }
 
         return t;
-
     }
 
     public static void CreateObjectL<T>(ref ushort len) where T : class, new()
     {
-         CreateObjectLWithType(typeof(T), ref len);
+        CreateObjectLWithType(typeof(T), ref len);
     }
 
     public static void CreateArraryObjectL<T>(int count, ref ushort len) where T : class, new()
@@ -351,6 +346,7 @@ public static class SiemensRefelectionUtil
         var byteTransform = new ReverseBytesTransform();
         CreateObject(t, buffer, ref idx, byteTransform);
     }
+
     public static void CreateObject<T>(T t, byte[] buffer, ref int startIndex, IByteTransform byteTransform) where T : class, new()
     {
         Type obj_type = t.GetType();
@@ -396,17 +392,15 @@ public static class SiemensRefelectionUtil
             object[] customAttributes1 = pi.GetCustomAttributes(typeof(KstopaStructPropertyAttribute), inherit: false);
             if (customAttributes1.Length > 0)
             {
-
                 KstopaStructPropertyAttribute kstopaStructPropertyAttribute = (KstopaStructPropertyAttribute)customAttributes1[0];
                 int Length = kstopaStructPropertyAttribute.Lenght;
-
 
                 // 1 获取属性类型
                 Type propertyType = pi.PropertyType;
                 if (propertyType == typeof(byte))
                 {
                     var v = (byte)pi.GetValue(t, null);
-                    
+
                     var bs = byteTransform.TransByte(v);
                     buffer.SetMiddle(startIndex, bs);
                 }
@@ -423,7 +417,7 @@ public static class SiemensRefelectionUtil
                 else if (propertyType == typeof(short) || propertyType == typeof(Int16))
                 {
                     var v = (short)pi.GetValue(t, null);
-                    
+
                     var bs = byteTransform.TransByte(v);
                     buffer.SetMiddle(startIndex, bs);
                 }
@@ -439,7 +433,7 @@ public static class SiemensRefelectionUtil
                 else if (propertyType == typeof(ushort))
                 {
                     var v = (ushort)pi.GetValue(t, null);
-                   
+
                     var bs = byteTransform.TransByte(v);
                     buffer.SetMiddle(startIndex, bs);
                 }
@@ -455,7 +449,7 @@ public static class SiemensRefelectionUtil
                 else if (propertyType == typeof(int))
                 {
                     var v = (int)pi.GetValue(t, null);
-                    
+
                     var bs = byteTransform.TransByte(v);
                     buffer.SetMiddle(startIndex, bs);
                 }
@@ -471,7 +465,7 @@ public static class SiemensRefelectionUtil
                 else if (propertyType == typeof(uint))
                 {
                     var v = (uint)pi.GetValue(t, null);
-                    
+
                     var bs = byteTransform.TransByte(v);
                     buffer.SetMiddle(startIndex, bs);
                 }
@@ -487,7 +481,7 @@ public static class SiemensRefelectionUtil
                 else if (propertyType == typeof(long))
                 {
                     var v = (long)pi.GetValue(t, null);
-                   
+
                     var bs = byteTransform.TransByte(v);
                     buffer.SetMiddle(startIndex, bs);
                 }
@@ -503,7 +497,7 @@ public static class SiemensRefelectionUtil
                 else if (propertyType == typeof(ulong))
                 {
                     var v = (ulong)pi.GetValue(t, null);
-                    
+
                     var bs = byteTransform.TransByte(v);
                     buffer.SetMiddle(startIndex, bs);
                 }
@@ -519,7 +513,7 @@ public static class SiemensRefelectionUtil
                 else if (propertyType == typeof(float))
                 {
                     var v = (float)pi.GetValue(t, null);
-                    
+
                     var bs = byteTransform.TransByte(v);
                     buffer.SetMiddle(startIndex, bs);
                 }
@@ -535,7 +529,7 @@ public static class SiemensRefelectionUtil
                 else if (propertyType == typeof(double))
                 {
                     var v = (double)pi.GetValue(t, null);
-                    
+
                     var bs = byteTransform.TransByte(v);
                     buffer.SetMiddle(startIndex, bs);
                 }
@@ -557,7 +551,7 @@ public static class SiemensRefelectionUtil
                         {
                             //防呆处理，字符串长度大于设置值时，需要自动裁断，string类型不支持中文，中文使用WString类型，暂时没有该功能。即string 类型中传递中文PLC是获取不到的，
                             var strLen = v.Length;
-                            if(strLen > Length - 2) strLen = Length - 2;
+                            if (strLen > Length - 2) strLen = Length - 2;
                             var bs = byteTransform.TransByte(v, strLen, Encoding.ASCII);
                             byte[] ret_bs = new byte[bs.Length + 2];
                             ret_bs[0] = (byte)(Length - 2);
@@ -577,15 +571,15 @@ public static class SiemensRefelectionUtil
                         {
                             //防呆处理，字符串长度大于设置值时，需要自动裁断，string类型不支持中文，中文使用WString类型，暂时没有该功能。即string 类型中传递中文PLC是获取不到的，
                             var strLen = v.Length;
-                            if (v.Length > (Length -4) / 2)
+                            if (v.Length > (Length - 4) / 2)
                             {
-                                strLen = (Length -4) / 2;
+                                strLen = (Length - 4) / 2;
                                 v = v.Substring(0, strLen);
                             }
                             var bs = byteTransform.TransByte(v, strLen * 2, Encoding.Unicode);
                             byte[] ret_bs = new byte[bs.Length + 4];
-                            ret_bs[0] = (byte)(((Length -4)/ 2) >> 8);
-                            ret_bs[1] = (byte)((Length -4 )/ 2);
+                            ret_bs[0] = (byte)(((Length - 4) / 2) >> 8);
+                            ret_bs[1] = (byte)((Length - 4) / 2);
                             ret_bs[2] = (byte)(strLen >> 8);
                             ret_bs[3] = (byte)strLen;
 
@@ -622,6 +616,7 @@ public static class SiemensRefelectionUtil
             }
         }
     }
+
     public static void CreateArraryObject<T>(T[] ts, int count, byte[] buff, ref int startIdx, IByteTransform byteTransform) where T : class, new()
     {
         for (int i = 0; i < count; i++)
@@ -641,59 +636,68 @@ public static class SiemensRefelectionUtil
     public static Type GetReadClassType(this PublicInfo p)
     {
         var namespaceName = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-        return Type.GetType($"{namespaceName}.{p.ReadClassName}");
+        return Type.GetType($"{namespaceName}.{p.ReadInfo.ClassName}");
     }
+
     public static Type GetWriteClassType(this PublicInfo p)
     {
         var namespaceName = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-        return Type.GetType($"{namespaceName}.{p.WriteClassName}");
+        return Type.GetType($"{namespaceName}.{p.WriterInfo.ClassName}");
     }
+
     public static Type GetReadClassType(this EventInfo ei)
     {
         var namespaceName = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-        return Type.GetType($"{namespaceName}.{ei.ReadClassName}");
+        return Type.GetType($"{namespaceName}.{ei.ReadInfo.ClassName}");
     }
 
     public static Type GetWriteClassType(this EventInfo ei)
     {
         var namespaceName = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-        return Type.GetType($"{namespaceName}.{ei.WriteClassName}");
+        return Type.GetType($"{namespaceName}.{ei.WriteInfo.ClassName}");
     }
+
     public static void ResetReadClassLenth(this PublicInfo p)
     {
-        p.ReadLen = GetObjectLenghtWithType(p.GetReadClassType());
+        p.ReadInfo.Lenght = GetObjectLenghtWithType(p.GetReadClassType());
     }
+
     public static void ResetReadClassLenth(this EventInfo ei)
     {
-        ei.ReadLen = GetObjectLenghtWithType(ei.GetReadClassType());
+        ei.ReadInfo.Lenght = GetObjectLenghtWithType(ei.GetReadClassType());
     }
+
     public static void UpdateReadContent(this PublicInfo p, byte[] read_buffer)
     {
         //p.ObjR = PraseStructContent(p.GetReadClassType(), read_buffer, new ReverseBytesTransform());
     }
+
     public static void UpdateReadContent(this EventInfo ei, byte[] read_buffer)
     {
         //ei.ObjR = PraseStructContent(ei.GetReadClassType(), read_buffer, new ReverseBytesTransform());
     }
+
     public static void ResetWriteClassLenth(this PublicInfo p)
     {
-        p.WriteLen = GetObjectLenghtWithType(p.GetWriteClassType());
+        p.WriterInfo.Lenght = GetObjectLenghtWithType(p.GetWriteClassType());
         //p.WriteBuffer = new byte[p.WriteLen];
     }
+
     public static void ResetWriteClassLenth(this EventInfo ei)
     {
-        ei.WriteLen = GetObjectLenghtWithType(ei.GetWriteClassType());
-        ei.WriteBuffer = new byte[ei.WriteLen];
+        ei.WriteInfo.Lenght = GetObjectLenghtWithType(ei.GetWriteClassType());
+        ei.WriteInfo.Buffer = new byte[ei.WriteInfo.Lenght];
     }
+
     public static void UpdateWriteContent(this PublicInfo p, byte[] read_buffer)
     {
         //p.ObjW = PraseStructContent(p.GetWriteClassType(), read_buffer, new ReverseBytesTransform());
     }
+
     public static void UpdateWriteContent(this EventInfo ei, byte[] write_buffer)
     {
         //ei.ObjW = PraseStructContent(ei.GetWriteClassType(), write_buffer, new ReverseBytesTransform());
     }
-
 
     public static Type GetTypeByName(string name)
     {
@@ -765,25 +769,28 @@ public static class SiemensRefelectionUtil
         }
         return obj;
     }
-
 }
 
 public class KstopaStructAttribute : Attribute
 {
     public int Count { get; set; }
+
     public KstopaStructAttribute(int count = 1)
     {
         Count = count;
     }
 }
+
 public class KstopaStructPropertyAttribute : Attribute
 {
     public int Lenght { get; set; }
     public string Encoding { get; set; }
+
     public KstopaStructPropertyAttribute()
     {
         this.Lenght = 1;
     }
+
     public KstopaStructPropertyAttribute(int lenght, string encoding = "ASCII")
     {
         this.Lenght = lenght;

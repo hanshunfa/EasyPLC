@@ -24,14 +24,15 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
     }
 
     #region 回调监听，全部都是同步的，里面不能有阻塞操作
+
     private async Task OnErr(string errMsg)
     {
-        
     }
+
     private async Task OnInfo(string Info)
     {
-
     }
+
     /// <summary>
     /// 公共区读取内容
     /// </summary>
@@ -46,13 +47,14 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
             Name = plc.Name,
             Ip = plc.IP,
             Version = plc.Version,
-            ReadTime = plc.PI.ReadTime,
-            SendTime = plc.PI.SendTime,
+            ReadTime = plc.PI.ReadInfo.DoTime,
+            SendTime = plc.PI.WriterInfo.DoTime,
             ReadBody = readBody,
             WriteBody = writeBody,
             Status = EventStatus.Ready
         });
     }
+
     /// <summary>
     /// 事件区读取内容
     /// </summary>
@@ -61,7 +63,7 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
     private async Task OnEvent(SiemensPlcInfo plc, int eventIdx)
     {
         //提取PLC事件信息
-        var readBody = plc.CreateEventDataJsonString(eventIdx, CreateJsonStringUtil.EnumBody.ReadBody);
+        var readBody = plc.CreateEventDataJsonString(eventIdx);
         var writeBody = plc.CreateEventDataJsonString(eventIdx, CreateJsonStringUtil.EnumBody.WriteBody);
         await _rabbitMQManagementService.PublishRealtimeEvent(
             new RabbitMqInfoInput
@@ -70,37 +72,40 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
                 Name = plc.Name,
                 Ip = plc.IP,
                 Version = plc.Version,
-                ReadTime = plc.EIs[eventIdx].ReadTime,
-                SendTime = plc.EIs[eventIdx].SendTime,
+                ReadTime = plc.EIs[eventIdx].ReadInfo.DoTime,
+                SendTime = plc.EIs[eventIdx].WriteInfo.DoTime,
                 ReadBody = readBody,
                 WriteBody = writeBody,
                 Status = EventStatus.Ready
             });
     }
 
-    #endregion
+    #endregion 回调监听，全部都是同步的，里面不能有阻塞操作
 
     private bool IsUse { get; set; } = false;
+
     public void Use()
     {
         IsUse = true;
     }
-    private List<ConnectionSiemensPLC> ListConnectionSiemensPLC = new List<ConnectionSiemensPLC>();
+
+    private readonly List<ConnectionSiemensPLC> _listConnectionSiemensPlc = new();
+
     /// <summary>
     /// 初始化工厂，创建PLC通讯实列
     /// </summary>
     public async Task<string> InitFactory()
     {
         if (!IsUse) return "工厂不能使用，请联系管理员";
-        if (ListConnectionSiemensPLC.Count > 0) return "工厂已存在";
+        if (_listConnectionSiemensPlc.Count > 0) return "工厂已存在";
         var plcInfos = await _genSiemensPlcInfoUtil.GenSiemensPLCInfoList();
         if (plcInfos == null || plcInfos.Count == 0) return "没有配置的PLC";
         //创建实例
-        foreach ( var plcInfo in plcInfos )
+        foreach (var plcInfo in plcInfos)
         {
             var connectionSiemensPlc = new ConnectionSiemensPLC();
             connectionSiemensPlc.SetPlcInfo(plcInfo);
-            ListConnectionSiemensPLC.Add(connectionSiemensPlc);
+            _listConnectionSiemensPlc.Add(connectionSiemensPlc);
 
             //监听回调
             connectionSiemensPlc.OnErr += OnErr;
@@ -111,6 +116,7 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
 
         return "成功";
     }
+
     /// <summary>
     /// 关闭工厂
     /// </summary>
@@ -118,9 +124,10 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
     public string CloseFactory()
     {
         if (!IsUse) return "工厂不能使用，请联系管理员";
-        if (ListConnectionSiemensPLC.Count == 0) return "工厂不存在";
+        if (_listConnectionSiemensPlc.Count == 0) return "工厂不存在";
         //取消监听
-        ListConnectionSiemensPLC.ForEach(connPlc => {
+        _listConnectionSiemensPlc.ForEach(connPlc =>
+        {
             connPlc.OnErr -= OnErr;
             connPlc.OnInfo -= OnInfo;
             connPlc.OnPublicCallback -= OnPublic;
@@ -128,52 +135,58 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
         });
         //关闭所有PLC
         StopPLC();
-        ListConnectionSiemensPLC.Clear();
+        _listConnectionSiemensPlc.Clear();
         return "成功";
     }
+
     public void StartPLC()
     {
         if (!IsUse) return;
-        foreach (var connection in ListConnectionSiemensPLC)
+        foreach (ConnectionSiemensPLC connection in _listConnectionSiemensPlc)
         {
             connection.StartWork();
         }
     }
-    public string StartPLC(ConnectionSiemensPLC connectionSiemensPLC)
+
+    public string StartPLC(ConnectionSiemensPLC connectionSiemensPlc)
     {
         if (!IsUse) return "工厂不能使用，请联系管理员";
-        return connectionSiemensPLC.StartWork();
+        return connectionSiemensPlc.StartWork();
     }
+
     public string StartPLC(string ip)
     {
         if (!IsUse) return "工厂不能使用，请联系管理员";
-        var plc = ListConnectionSiemensPLC.Where(it=>it.PlcInfo.IP == ip).FirstOrDefault();
+        var plc = _listConnectionSiemensPlc.Where(it => it.PlcInfo.IP == ip).FirstOrDefault();
         if (plc == null) return $"IP[{ip}]不在在线PLC列表中";
         return plc.StartWork();
     }
-    public string StopPLC(ConnectionSiemensPLC connectionSiemensPLC)
+
+    public string StopPLC(ConnectionSiemensPLC connectionSiemensPlc)
     {
         if (!IsUse) return "工厂不能使用，请联系管理员";
-        return connectionSiemensPLC.StopWork();
+        return connectionSiemensPlc.StopWork();
     }
+
     public string StopPLC(string ip)
     {
         if (!IsUse) return "工厂不能使用，请联系管理员";
-        var plc = ListConnectionSiemensPLC.Where(it => it.PlcInfo.IP == ip).FirstOrDefault();
+        var plc = _listConnectionSiemensPlc.Where(it => it.PlcInfo.IP == ip).FirstOrDefault();
         if (plc == null) return $"IP[{ip}]不在在线PLC列表中";
         return plc.StopWork();
     }
+
     public void StopPLC()
     {
-        if (!IsUse) return ;
-        foreach (var connection in ListConnectionSiemensPLC)
+        if (!IsUse) return;
+        foreach (var connection in _listConnectionSiemensPlc)
         {
             connection.StopWork();
         }
     }
+
     public List<ConnectionSiemensPLC> GetConnectionSiemensPLCList()
     {
-        return ListConnectionSiemensPLC;
+        return _listConnectionSiemensPlc;
     }
-
 }
