@@ -98,7 +98,7 @@ public class SiemensPlcFactoryService : ISiemensPlcFactoryService
     {
         if (!IsUse) return "工厂不能使用，请联系管理员";
         if (_listConnectionSiemensPlc.Count > 0) return "工厂已存在";
-        var plcInfos = await _genSiemensPlcInfoUtil.GenSiemensPLCInfoList();
+        var plcInfos = await _genSiemensPlcInfoUtil.GenSiemensPlcInfoList();
         if (plcInfos == null || plcInfos.Count == 0) return "没有配置的PLC";
         //创建实例
         foreach (var plcInfo in plcInfos)

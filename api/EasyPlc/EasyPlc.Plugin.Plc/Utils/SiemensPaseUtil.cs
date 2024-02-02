@@ -38,12 +38,12 @@ namespace EasyPlc.Plugin.Plc.Utils;
 /// </summary>
 public static class SiemensPaseUtil
 {
-    public static void ReadTree(this List<PlcResource> resources, byte[] buffer)
+    public static List<PlcResource> ReadTree(this List<PlcResource> resources, byte[] buffer)
     {
         int startIndex = 0;
-        resources.ReadTreeWithChildren(buffer,ref startIndex, new ReverseBytesTransform());
+        return resources.ReadTreeWithChildren(buffer,ref startIndex, new ReverseBytesTransform());
     }
-    public static void ReadTreeWithChildren(this List<PlcResource> resources, byte[] buffer, ref int startIndex, IByteTransform byteTransform)
+    public static List<PlcResource> ReadTreeWithChildren(this List<PlcResource> resources, byte[] buffer, ref int startIndex, IByteTransform byteTransform)
     {
         if(resources != null && resources.Count > 0)
         {
@@ -136,6 +136,8 @@ public static class SiemensPaseUtil
                 }
             }
         }
+
+        return resources;
     }
 
     public static byte[] WriteBuffer(this List<PlcResource> resources)
@@ -274,11 +276,12 @@ public static class SiemensPaseUtil
     {
         return resources.GetResourceWithKey("EventTrigger");
     }
-    public static PlcResource GetResourceWithSequenceID(this List<PlcResource> resources)
+    public static PlcResource GetResourceWithSequenceId(this List<PlcResource> resources)
     {
         return resources.GetResourceWithKey("SequenceID");
     }
-    public static PlcResource GetResourceWithKey(this List<PlcResource> resources, string key)
+
+    private static PlcResource GetResourceWithKey(this IReadOnlyList<PlcResource> resources, string key)
     {
         if(resources != null && resources.Count > 0)
         {
@@ -299,5 +302,75 @@ public static class SiemensPaseUtil
             return null;
         }
     }
-    
+    private static dynamic GetDynamicWithKey(this IReadOnlyList<PlcResource> resources, string key)
+    {
+        if (resources != null && resources.Count > 0)
+        {
+            for (int i = 0; i < resources.Count; i++)
+            {
+                if (resources[i].Code == key)
+                {
+                    return resources[i].Value;
+                }
+            }
+            return null;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// 通过Tree创建TypeObj对象
+    /// </summary>
+    /// <param name="resources"></param>
+    /// <param name="objType"></param>
+    public static object GetTypeObj4Tree(this List<PlcResource> resources, Type objType)
+    {
+        //创建实列对象
+        var t = Activator.CreateInstance(objType);
+        //获取实列对象属性
+        var pis = objType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+        for (int i =0; i < pis.Count(); i ++)
+        {
+            var pi = pis[i];
+            var piName = pi.Name;
+            if (
+                pi.PropertyType == typeof(bool[])
+                || pi.PropertyType == typeof(short)
+                || pi.PropertyType == typeof(short[])
+                || pi.PropertyType == typeof(int)
+                || pi.PropertyType == typeof(int[])
+                || pi.PropertyType == typeof(float)
+                || pi.PropertyType == typeof(float[])
+                || pi.PropertyType == typeof(string)
+                )
+            {
+                pi.SetValue(t, resources.GetDynamicWithKey(piName));
+            }
+            else
+            {
+                //类对象
+                //类属性
+                if (pi.PropertyType.IsArray)//结构数组对象
+                {
+                    //数组Count
+                    var arrCount = resources[i].Children.Count;
+                    var classType = pi.PropertyType.GetElementType();
+                    var arr = Array.CreateInstance(classType, arrCount);
+                    for (int j = 0;j < arrCount; j ++)
+                    {
+                        arr.SetValue(resources[i].Children[j].Children.GetTypeObj4Tree(classType), j);
+                    }
+                    pi.SetValue(t, arr);
+                }
+                else//结构对象
+                {
+                    pi.SetValue(t, resources[0].Children.GetTypeObj4Tree(pi.PropertyType.GetTypeInfo()));
+                }
+            }
+        }
+        return t;
+    }
 }

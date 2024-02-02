@@ -85,7 +85,7 @@ public static class SiemensRefelectionUtil
                 }
                 else if (propertyType == typeof(ushort[]))
                 {
-                    pi.SetValue(t, byteTransform.TransUInt16(buffer, startIndex, Length / 2), null);
+                    pi.SetValue(t, byteTransform.TransUInt16(buffer, startIndex, Length / 2), index: null);
                 }
                 else if (propertyType == typeof(int))
                 {

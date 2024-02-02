@@ -10,7 +10,7 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
     private SiemensS7Net _plc;
     private Thread _workThread;
     private ManualResetEvent _mre;
-    public SiemensPlcInfo PlcInfo { get; set; } = null;
+    public SiemensPlcInfo PlcInfo { get; set; }
 
     //定义回调事件
     public delegate Task Err(string errMsg);
@@ -156,7 +156,7 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
             }
             //解析byte[]到指定特性对象种
             PlcInfo.PI.ReadInfo.DoTime = DateTime.Now;//读到时候时间
-            PlcInfo.PI.ReadInfo.ListPr.ReadTree(operateResult01.Content);
+            PlcInfo.PI.ReadInfo.Obj = PlcInfo.PI.ReadInfo.ListPr.ReadTree(operateResult01.Content).GetTypeObj4Tree(PlcInfo.PI.ReadInfo.ObjT);
             //读取PC公共区 只需要读取一次
             if (PlcInfo.PI.WriterInfo.IsReset)
             {
@@ -227,7 +227,7 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
                                 continue;
                             }
                             PlcInfo.EIs[i].WriteInfo.ListPr.ReadTree(opW.Content);
-                            var sequenceIdw = PlcInfo.EIs[i].WriteInfo.ListPr.GetResourceWithSequenceID();
+                            var sequenceIdw = PlcInfo.EIs[i].WriteInfo.ListPr.GetResourceWithSequenceId();
                             if (sequenceIdw == null)
                             {
                                 await OnErr.Invoke($"事件{PlcInfo.EIs[i].WriteInfo.ClassName}配置中缺少【SequenceID】");
@@ -251,7 +251,7 @@ public class ConnectionSiemensPLC : IConnectionSiemensPLC
                         }
                         //更新事件实例内容
                         PlcInfo.EIs[i].ReadInfo.ListPr.ReadTree(opR.Content);
-                        var sequenceIdr = PlcInfo.EIs[i].ReadInfo.ListPr.GetResourceWithSequenceID();
+                        var sequenceIdr = PlcInfo.EIs[i].ReadInfo.ListPr.GetResourceWithSequenceId();
                         if (sequenceIdr == null)
                         {
                             await OnErr?.Invoke($"事件{PlcInfo.EIs[i].ReadInfo.ClassName}配置中缺少【SequenceID】");

@@ -36,63 +36,63 @@ using System.Threading.Tasks;
 
 namespace EasyPlc.Core.Utils
 {
-    internal class SyntaxTreeHelper
+    public class SyntaxTreeHelper
     {
-        public static Type GetModelTypeByClass(string classString, string typeName)
+        /// <summary>
+        /// 动态编译
+        /// </summary>
+        /// <param name="classString">编译内容字符串</param>
+        /// <param name="typeNames">类列表</param>
+        /// <returns>类型列表</returns>
+        /// <exception cref="Exception"></exception>
+        public static List<Type> GetModelTypeByClass(string classString, List<string> typeNames)
         {
             //Write("Parsing the code into the SyntaxTree");
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(classString);
 
             string assemblyName = Path.GetRandomFileName();
             //命名空间
-            string[] refPaths = new[] {
-                //typeof(AccessViolationException).Assembly.Location,
-                typeof(System.Object).GetTypeInfo().Assembly.Location,
-                typeof(Console).GetTypeInfo().Assembly.Location,
-                Path.Combine(Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location), "System.Runtime.dll"),
+            string[] refPaths = {
+                typeof(Object).GetTypeInfo().Assembly.Location,
+                typeof(Console).GetTypeInfo().Assembly.Location
             };
             MetadataReference[] references = refPaths.Select(r => MetadataReference.CreateFromFile(r)).ToArray();
-
-            //Write("Adding the following references");
-            //foreach (var r in refPaths)
-            // Write(r);
-
-            //Write("Compiling ...");
             CSharpCompilation compilation = CSharpCompilation.Create(
                 assemblyName,
                 syntaxTrees: new[] { syntaxTree },
                 references: references,
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-            using (MemoryStream ms = new MemoryStream())
+            using MemoryStream ms = new MemoryStream();
+            EmitResult result = compilation.Emit(ms);
+
+            if (!result.Success)
             {
-                EmitResult result = compilation.Emit(ms);
+                //Write("Compilation failed!");
+                IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
+                    diagnostic.IsWarningAsError ||
+                    diagnostic.Severity == DiagnosticSeverity.Error);
 
-                if (!result.Success)
+                string message = "";
+                foreach (Diagnostic diagnostic in failures)
                 {
-                    //Write("Compilation failed!");
-                    IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
-                        diagnostic.IsWarningAsError ||
-                        diagnostic.Severity == DiagnosticSeverity.Error);
-
-                    string message = "";
-                    foreach (Diagnostic diagnostic in failures)
-                    {
-                        message += diagnostic.GetMessage();
-                    }
-                    throw new Exception("解析实体类出错，请检查命名" + message + " \r\n " + classString);
+                    message += diagnostic.GetMessage();
                 }
-                else
-                {
-                    //Write("Compilation successful! Now instantiating and executing the code ...");
-                    ms.Seek(0, SeekOrigin.Begin);
-
-                    Assembly assembly = AssemblyLoadContext.Default.LoadFromStream(ms);
-                    var type = assembly.GetType("RoslynCompileSampleDemo." + typeName);
-                    //Console.WriteLine(type.Name);
-                    return type;
-                }
+                throw new Exception("解析实体类出错，请检查命名" + message + " \r\n " + classString);
             }
+
+            //Write("Compilation successful! Now instantiating and executing the code ...");
+            ms.Seek(0, SeekOrigin.Begin);
+
+            Assembly assembly = AssemblyLoadContext.Default.LoadFromStream(ms);
+            List<Type> types = new List<Type>();
+            foreach (var typeName in typeNames)
+            {
+                types.Add(assembly.GetType("RoslynCompileEasyPlcEntities." + typeName)); 
+            }
+                    
+            //Console.WriteLine(type.Name);
+            return types;
         }
     }
 }

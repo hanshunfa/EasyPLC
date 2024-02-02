@@ -502,8 +502,8 @@ public class GenBasicService : IGenbasicService
 
                 for (int i = 0; i < addrsSJR.Count; i++)
                 {
-                    var sjR = resourceList.Where(it => it.Id == addrsSJR[i].ResourceId).FirstOrDefault();
-                    var sjW = resourceList.Where(it => it.Id == addrsSJW[i].ResourceId).FirstOrDefault();
+                    var sjR = resourceList.FirstOrDefault(it => it.Id == addrsSJR[i].ResourceId);
+                    var sjW = resourceList.FirstOrDefault(it => it.Id == addrsSJW[i].ResourceId);
                    
                     //new EventInfo()
                     var nIS_3 = nIS_2;

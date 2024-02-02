@@ -17,11 +17,10 @@ public interface ISiemensPlcFactoryService : ISingleton
     /// </summary>
     /// <returns></returns>
     string CloseFactory();
+
     /// <summary>
     /// 全部开始
     /// </summary>
-    /// <param name="connectionSiemensPLC"></param>
-    /// <returns></returns>
     void StartPLC();
     /// <summary>
     /// 开始

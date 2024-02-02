@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NetTaste;
 
 namespace EasyPlc.Plugin.Plc
 {
@@ -60,7 +61,10 @@ namespace EasyPlc.Plugin.Plc
         /// 对象类型
         /// </summary>
         public Type ObjT { get; set; }
-
+        /// <summary>
+        /// 对象实体
+        /// </summary>
+        public object Obj { get; set; }
         /// <summary>
         /// 树形列表类型数据
         /// </summary>
